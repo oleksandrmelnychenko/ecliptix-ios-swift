@@ -1,0 +1,123 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+import "contexts/identity_access/account.proto";
+
+package ecliptix.proto.membership;
+option csharp_namespace = "Ecliptix.Protobuf.Membership";
+option swift_prefix = "";
+
+message Membership {
+  bytes membership_id = 1;
+
+  enum ActivityStatus {
+    ACTIVITY_STATUS_UNSPECIFIED = 0;
+    ACTIVITY_STATUS_ACTIVE = 1;
+    ACTIVITY_STATUS_INACTIVE = 2;
+  }
+
+  enum CreationStatus {
+    CREATION_STATUS_UNSPECIFIED = 0;
+    CREATION_STATUS_OTP_VERIFIED = 1;
+    CREATION_STATUS_SECURE_KEY_SET = 2;
+    CREATION_STATUS_PASSPHRASE_SET = 3;
+  }
+
+  ActivityStatus status = 3;
+  optional CreationStatus creation_status = 4;
+  repeated ecliptix.proto.account.Account accounts = 5;
+}
+
+enum MobileNumberAvailabilityStatus {
+  MOBILE_NUMBER_AVAILABILITY_STATUS_UNSPECIFIED = 0;
+  MOBILE_NUMBER_AVAILABILITY_STATUS_AVAILABLE = 1;
+  MOBILE_NUMBER_AVAILABILITY_STATUS_INCOMPLETE_REGISTRATION = 2;
+  MOBILE_NUMBER_AVAILABILITY_STATUS_TAKEN_ACTIVE = 3;
+  MOBILE_NUMBER_AVAILABILITY_STATUS_TAKEN_INACTIVE = 4;
+  MOBILE_NUMBER_AVAILABILITY_STATUS_DATA_CORRUPTION = 5;
+  MOBILE_NUMBER_AVAILABILITY_STATUS_REGISTRATION_EXPIRED = 6;
+}
+
+message MobileNumberAvailabilityRequest {
+  bytes mobile_number_id = 1;
+}
+
+message MobileNumberAvailabilityResponse {
+  MobileNumberAvailabilityStatus status = 1;
+  bool can_register = 2;
+  bool can_continue = 3;
+  optional bytes existing_membership_id = 4;
+  optional bytes registered_device_id = 5;
+  optional Membership.CreationStatus creation_status = 6;
+  optional Membership.ActivityStatus activity_status = 7;
+  string localization_key = 8;
+  optional bytes account_id = 9;
+}
+
+enum LogoutScope {
+  LOGOUT_SCOPE_UNSPECIFIED = 0;
+  LOGOUT_SCOPE_THIS_DEVICE = 1;
+  LOGOUT_SCOPE_ALL_DEVICES = 2;
+}
+
+enum LogoutReason {
+  LOGOUT_REASON_UNSPECIFIED = 0;
+  LOGOUT_REASON_USER_INITIATED = 1;
+  LOGOUT_REASON_DEVICE_REMOVED = 2;
+  LOGOUT_REASON_SECURITY_VIOLATION = 3;
+  LOGOUT_REASON_ACCOUNT_DEACTIVATED = 4;
+  LOGOUT_REASON_PASSWORD_CHANGED = 5;
+  LOGOUT_REASON_FORCE_LOGOUT = 6;
+  LOGOUT_REASON_SYSTEM_MAINTENANCE = 7;
+}
+
+message AuthenticatedLogoutRequest {
+  bytes membership_id = 1;
+  LogoutReason logout_reason = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  bytes hmac_proof = 4;
+  LogoutScope scope = 5;
+  optional bytes account_id = 6;
+}
+
+message AuthenticatedLogoutResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_SUCCEEDED = 1;
+    RESULT_ALREADY_LOGGED_OUT = 2;
+    RESULT_SESSION_NOT_FOUND = 3;
+    RESULT_FAILED = 4;
+    RESULT_INVALID_TIMESTAMP = 5;
+    RESULT_INVALID_HMAC = 6;
+  }
+  Result result = 1;
+  google.protobuf.Timestamp server_timestamp = 2;
+  bytes revocation_proof = 3;
+}
+
+message LogoutRequest {
+  bytes membership_id = 1;
+  LogoutReason logout_reason = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  bytes hmac_proof = 4;
+  LogoutScope scope = 5;
+  optional bytes account_id = 6;
+}
+
+message LogoutResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_SUCCEEDED = 1;
+    RESULT_ALREADY_LOGGED_OUT = 2;
+    RESULT_SESSION_NOT_FOUND = 3;
+    RESULT_INVALID_TIMESTAMP = 4;
+    RESULT_INVALID_HMAC = 5;
+    RESULT_TIMESTAMP_TOO_OLD = 6;
+    RESULT_FAILED = 7;
+  }
+  Result result = 1;
+  google.protobuf.Timestamp server_timestamp = 2;
+  optional string message = 3;
+}

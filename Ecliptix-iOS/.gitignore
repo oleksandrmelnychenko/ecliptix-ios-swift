@@ -1,0 +1,39 @@
+.DS_Store
+.derivedData-device/
+DerivedData/
+*.xcuserstate
+*.pbxproj.backup
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+.build/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Generated Proto Files
+Generated/
+
+# CocoaPods
+Pods/
+*.podspec
+
+# macOS
+.DS_Store
+
+# Build artifacts
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Local IDE/build server metadata
+buildServer.json
+
+# Local binary package backups and artifacts
+*.xcframework/
+*.xcframework
+*.xcframework.bak/
+*.xcframework.bak

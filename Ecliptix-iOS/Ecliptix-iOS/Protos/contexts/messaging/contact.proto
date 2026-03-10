@@ -1,0 +1,71 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+
+package ecliptix.proto.messaging;
+option csharp_namespace = "Ecliptix.Protobuf.Messaging";
+option swift_prefix = "Proto";
+
+enum ContactRelationship {
+  CONTACT_RELATIONSHIP_UNSPECIFIED = 0;
+  CONTACT_RELATIONSHIP_NONE = 1;
+  CONTACT_RELATIONSHIP_CONTACT = 2;
+  CONTACT_RELATIONSHIP_BLOCKED = 3;
+}
+
+message Contact {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  string display_name = 3;
+  string profile_name = 4;
+  optional string avatar_url = 5;
+  ContactRelationship relationship = 6;
+  google.protobuf.Timestamp added_at = 7;
+}
+
+message SearchContactsRequest {
+  bytes membership_id = 1;
+  string query = 2;
+  optional int32 page_size = 3;
+  optional string page_token = 4;
+  bytes account_id = 5;
+}
+
+message SearchContactsResponse {
+  repeated Contact contacts = 1;
+  string next_page_token = 2;
+}
+
+message ListContactsRequest {
+  bytes membership_id = 1;
+  optional int32 page_size = 2;
+  optional string page_token = 3;
+  bytes account_id = 4;
+}
+
+message ListContactsResponse {
+  repeated Contact contacts = 1;
+  string next_page_token = 2;
+}
+
+message BlockContactRequest {
+  bytes membership_id = 1;
+  bytes target_membership_id = 2;
+  bytes account_id = 3;
+}
+
+message BlockContactResponse {
+  bool is_success = 1;
+}
+
+message UnblockContactRequest {
+  bytes membership_id = 1;
+  bytes target_membership_id = 2;
+  bytes account_id = 3;
+}
+
+message UnblockContactResponse {
+  bool is_success = 1;
+}

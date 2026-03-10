@@ -1,0 +1,227 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+
+package ecliptix.proto.messaging;
+option csharp_namespace = "Ecliptix.Protobuf.Messaging";
+option swift_prefix = "Proto";
+
+enum ConversationType {
+  CONVERSATION_TYPE_UNSPECIFIED = 0;
+  CONVERSATION_TYPE_DIRECT = 1;
+  CONVERSATION_TYPE_GROUP = 2;
+  CONVERSATION_TYPE_CHANNEL = 3;
+}
+
+enum ConversationStatus {
+  CONVERSATION_STATUS_UNSPECIFIED = 0;
+  CONVERSATION_STATUS_ACTIVE = 1;
+  CONVERSATION_STATUS_ARCHIVED = 2;
+  CONVERSATION_STATUS_DELETED = 3;
+}
+
+enum ParticipantRole {
+  PARTICIPANT_ROLE_UNSPECIFIED = 0;
+  PARTICIPANT_ROLE_OWNER = 1;
+  PARTICIPANT_ROLE_ADMIN = 2;
+  PARTICIPANT_ROLE_MEMBER = 3;
+}
+
+enum MuteStatus {
+  MUTE_STATUS_UNSPECIFIED = 0;
+  MUTE_STATUS_UNMUTED = 1;
+  MUTE_STATUS_MUTED_1H = 2;
+  MUTE_STATUS_MUTED_8H = 3;
+  MUTE_STATUS_MUTED_1D = 4;
+  MUTE_STATUS_MUTED_7D = 5;
+  MUTE_STATUS_MUTED_FOREVER = 6;
+}
+
+enum MessageContentType {
+  MESSAGE_CONTENT_TYPE_UNSPECIFIED = 0;
+  MESSAGE_CONTENT_TYPE_TEXT = 1;
+  MESSAGE_CONTENT_TYPE_IMAGE = 2;
+  MESSAGE_CONTENT_TYPE_VIDEO = 3;
+  MESSAGE_CONTENT_TYPE_AUDIO = 4;
+  MESSAGE_CONTENT_TYPE_FILE = 5;
+  MESSAGE_CONTENT_TYPE_LOCATION = 6;
+  MESSAGE_CONTENT_TYPE_CONTACT = 7;
+  MESSAGE_CONTENT_TYPE_SYSTEM = 8;
+}
+
+message ParticipantInfo {
+  bytes membership_id = 1;
+  ParticipantRole role = 2;
+  google.protobuf.Timestamp joined_at = 3;
+  bytes account_id = 4;
+}
+
+message ConversationMember {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ParticipantRole role = 3;
+  string display_name = 4;
+  string profile_name = 5;
+  optional string avatar_url = 6;
+  google.protobuf.Timestamp joined_at = 7;
+}
+
+message MessagePreview {
+  bytes message_id = 1;
+  bytes sender_membership_id = 2;
+  string sender_display_name = 3;
+  string content_preview = 4;
+  google.protobuf.Timestamp sent_at = 5;
+  MessageContentType content_type = 6;
+}
+
+message ConversationInfo {
+  bytes conversation_id = 1;
+  ConversationType conversation_type = 2;
+  optional string title = 3;
+  repeated ParticipantInfo participants = 4;
+  uint64 last_message_seq = 5;
+  google.protobuf.Timestamp last_message_at = 6;
+  uint64 my_last_read_seq = 7;
+  uint32 unread_count = 8;
+  bool is_muted = 9;
+  bool is_archived = 10;
+  bool is_pinned = 11;
+}
+
+message Conversation {
+  bytes conversation_id = 1;
+  ConversationType type = 2;
+  ConversationStatus status = 3;
+  optional string title = 4;
+  optional string avatar_url = 5;
+  optional string description = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  repeated ConversationMember members = 9;
+  optional MessagePreview last_message = 10;
+  int32 unread_count = 11;
+  bool is_pinned = 12;
+  MuteStatus mute_status = 13;
+  bool is_broadcast = 20;
+  bool admin_signatures = 21;
+  optional bytes discussion_group_id = 22;
+  int32 subscriber_count = 23;
+}
+
+message CreateConversationRequest {
+  ConversationType conversation_type = 1;
+  repeated bytes participant_ids = 2;
+  optional string title = 3;
+}
+
+message CreateConversationResponse {
+  bytes conversation_id = 1;
+  google.protobuf.Timestamp created_at = 2;
+}
+
+message CreateDirectConversationRequest {
+  bytes initiator_membership_id = 1;
+  bytes recipient_membership_id = 2;
+  bytes account_id = 3;
+}
+
+message CreateDirectConversationResponse {
+  Conversation conversation = 1;
+  bool already_existed = 2;
+}
+
+message CreateGroupConversationRequest {
+  bytes creator_membership_id = 1;
+  string title = 2;
+  optional string description = 3;
+  optional string avatar_url = 4;
+  repeated bytes member_membership_ids = 5;
+  bytes account_id = 6;
+  bool shield_mode = 7;
+}
+
+message CreateGroupConversationResponse {
+  Conversation conversation = 1;
+}
+
+message ListConversationsRequest {
+  uint32 limit = 1;
+  optional bytes cursor = 2;
+}
+
+message ListConversationsResponse {
+  repeated ConversationInfo conversations = 1;
+  optional bytes next_cursor = 2;
+}
+
+message GetConversationRequest {
+  bytes conversation_id = 1;
+}
+
+message GetConversationResponse {
+  Conversation conversation = 1;
+}
+
+message UpdateConversationRequest {
+  bytes conversation_id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional string avatar_url = 4;
+}
+
+message UpdateConversationResponse {
+  Conversation conversation = 1;
+  bool is_success = 2;
+}
+
+message DeleteConversationRequest {
+  bytes conversation_id = 1;
+}
+
+message DeleteConversationResponse {
+  bool is_success = 1;
+}
+
+message PinConversationRequest {
+  bytes conversation_id = 1;
+  bool is_pinned = 2;
+}
+
+message PinConversationResponse {
+  bool is_success = 1;
+}
+
+message MuteConversationRequest {
+  bytes conversation_id = 1;
+  optional google.protobuf.Timestamp muted_until = 2;
+  MuteStatus mute_status = 3;
+}
+
+message MuteConversationResponse {
+  bool is_success = 1;
+}
+
+message ArchiveConversationRequest {
+  bytes conversation_id = 1;
+  bool archive = 2;
+}
+
+message ArchiveConversationResponse {
+  bool is_success = 1;
+}
+
+message GroupMemberRequest {
+  bytes conversation_id = 1;
+  bytes target_membership_id = 2;
+  optional ParticipantRole role = 3;
+}
+
+message GroupSettingsRequest {
+  bytes conversation_id = 1;
+  optional string title = 2;
+}
+
+message ConversationActionResponse {}

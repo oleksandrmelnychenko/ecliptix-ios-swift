@@ -1,0 +1,167 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+import "contexts/feed/post.proto";
+
+package ecliptix.proto.feed;
+option csharp_namespace = "Ecliptix.Protobuf.Feed";
+option swift_prefix = "Proto";
+
+enum FeedType {
+  FEED_TYPE_UNSPECIFIED = 0;
+  FEED_TYPE_FOR_YOU = 1;
+  FEED_TYPE_FOLLOWING = 2;
+}
+
+message GetFeedRequest {
+  bytes membership_id = 1;
+  FeedType feed_type = 2;
+  optional int32 page_size = 3;
+  optional string cursor = 4;
+  optional google.protobuf.Timestamp since = 5;
+  bytes account_id = 6;
+}
+
+message GetFeedResponse {
+  repeated Post posts = 1;
+  string next_cursor = 2;
+  bool has_more = 3;
+  google.protobuf.Timestamp server_timestamp = 4;
+}
+
+message CreatePostRequest {
+  bytes membership_id = 1;
+  string text_content = 2;
+  repeated PostMedia media = 3;
+  PostVisibility visibility = 4;
+  optional bytes reply_to_post_id = 5;
+  optional bytes quote_post_id = 6;
+  string client_post_id = 7;
+  bytes account_id = 8;
+}
+
+message CreatePostResponse {
+  Post post = 1;
+  bool is_success = 2;
+}
+
+message DeletePostRequest {
+  bytes membership_id = 1;
+  bytes post_id = 2;
+  bytes account_id = 3;
+}
+
+message DeletePostResponse {
+  bool is_success = 1;
+}
+
+message EditPostRequest {
+  bytes membership_id = 1;
+  bytes post_id = 2;
+  string text_content = 3;
+  bytes account_id = 4;
+}
+
+message EditPostResponse {
+  Post post = 1;
+  bool is_success = 2;
+}
+
+message LikePostRequest {
+  bytes membership_id = 1;
+  bytes post_id = 2;
+  bytes account_id = 3;
+}
+
+message LikePostResponse {
+  bool is_success = 1;
+  bool liked = 2;
+  int64 like_count = 3;
+}
+
+message RepostRequest {
+  bytes membership_id = 1;
+  bytes post_id = 2;
+  bytes account_id = 3;
+}
+
+message RepostResponse {
+  bool is_success = 1;
+  bool reposted = 2;
+  int64 repost_count = 3;
+}
+
+message BookmarkPostRequest {
+  bytes membership_id = 1;
+  bytes post_id = 2;
+  bytes account_id = 3;
+}
+
+message BookmarkPostResponse {
+  bool is_success = 1;
+  bool bookmarked = 2;
+}
+
+message GetPostThreadRequest {
+  bytes membership_id = 1;
+  bytes post_id = 2;
+  optional int32 reply_page_size = 3;
+  optional string reply_cursor = 4;
+  bytes account_id = 5;
+}
+
+message GetPostThreadResponse {
+  repeated Post ancestor_chain = 1;
+  Post focal_post = 2;
+  repeated Post replies = 3;
+  string next_reply_cursor = 4;
+  bool has_more_replies = 5;
+}
+
+message GetUserPostsRequest {
+  bytes membership_id = 1;
+  bytes target_membership_id = 2;
+  optional int32 page_size = 3;
+  optional string cursor = 4;
+  bytes account_id = 5;
+}
+
+message GetUserPostsResponse {
+  repeated Post posts = 1;
+  string next_cursor = 2;
+  bool has_more = 3;
+}
+
+message FollowUserRequest {
+  bytes membership_id = 1;
+  bytes target_membership_id = 2;
+  bytes account_id = 3;
+}
+
+message FollowUserResponse {
+  bool is_success = 1;
+  bool following = 2;
+}
+
+message SubscribeFeedUpdatesRequest {
+  bytes membership_id = 1;
+  FeedType feed_type = 2;
+  bytes account_id = 3;
+}
+
+message FeedUpdate {
+  oneof update {
+    Post new_post = 1;
+    Post updated_post = 2;
+    bytes deleted_post_id = 3;
+    PostMetricsUpdate metrics_update = 4;
+  }
+}
+
+message PostMetricsUpdate {
+  bytes post_id = 1;
+  PostMetrics metrics = 2;
+  PostInteractionState interaction = 3;
+}

@@ -1,0 +1,102 @@
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+import EcliptixProtos
+import Foundation
+
+enum GatewayRouteCatalog {
+
+  private static let routes: [RpcServiceType: GatewayRoute] = [
+    .getServerPublicKeys: GatewayRoute(.deviceProvisioning, .deviceServerKeys, .unary),
+    .registerAppDevice: GatewayRoute(.deviceProvisioning, .deviceRegistration, .unary),
+    .establishSecrecyChannel: GatewayRoute(.deviceProvisioning, .deviceSessionHandshake, .unary),
+    .restoreSecrecyChannel: GatewayRoute(.deviceProvisioning, .deviceSessionRecovery, .unary),
+    .establishAuthenticatedSecureChannel: GatewayRoute(
+      .deviceProvisioning, .deviceSessionAuthHandshake, .unary),
+    .validateMobileNumber: GatewayRoute(.identityAccess, .identityMobileNumberValidate, .unary),
+    .validateMobileForRecovery: GatewayRoute(
+      .identityAccess, .identityRecoveryMobileVerify, .unary),
+    .checkMobileNumberAvailability: GatewayRoute(
+      .identityAccess, .identityMobileNumberAvailability, .unary),
+    .initiateVerification: GatewayRoute(.identityAccess, .identityOtpInitiate, .serverStream),
+    .verifyOtp: GatewayRoute(.identityAccess, .identityOtpVerify, .unary),
+    .registrationInit: GatewayRoute(.identityAccess, .identityOpaqueRegistrationInit, .unary),
+    .registrationComplete: GatewayRoute(
+      .identityAccess, .identityOpaqueRegistrationComplete, .unary),
+    .recoveryInit: GatewayRoute(.identityAccess, .identityOpaqueRecoveryInit, .unary),
+    .recoveryComplete: GatewayRoute(.identityAccess, .identityOpaqueRecoveryComplete, .unary),
+    .signInInitRequest: GatewayRoute(.identityAccess, .identityOpaqueSigninInit, .unary),
+    .signInCompleteRequest: GatewayRoute(.identityAccess, .identityOpaqueSigninComplete, .unary),
+    .terminateSession: GatewayRoute(.identityAccess, .identitySessionLogout, .unary),
+    .anonymousLogout: GatewayRoute(.identityAccess, .identitySessionLogoutAnonymous, .unary),
+    .profileLookup: GatewayRoute(.identityAccess, .identityProfileLookup, .unary),
+    .profileUpsert: GatewayRoute(.identityAccess, .identityProfileUpsert, .unary),
+    .profileNameAvailability: GatewayRoute(
+      .identityAccess, .identityProfileNameAvailability, .unary),
+    .pinRegisterInit: GatewayRoute(.identityAccess, .identityPinRegisterInit, .unary),
+    .pinRegisterComplete: GatewayRoute(.identityAccess, .identityPinRegisterComplete, .unary),
+    .pinVerifyInit: GatewayRoute(.identityAccess, .identityPinVerifyInit, .unary),
+    .pinVerifyFinalize: GatewayRoute(.identityAccess, .identityPinVerifyFinalize, .unary),
+    .pinDisable: GatewayRoute(.identityAccess, .identityPinDisable, .unary),
+    .listConversations: GatewayRoute(.messaging, .messagingListConversations, .unary),
+    .getConversation: GatewayRoute(.messaging, .messagingGetConversation, .unary),
+    .createDirectConversation: GatewayRoute(.messaging, .messagingCreateConversation, .unary),
+    .createGroupConversation: GatewayRoute(.messaging, .messagingCreateConversation, .unary),
+    .updateConversation: GatewayRoute(.messaging, .messagingUpdateConversation, .unary),
+    .deleteConversation: GatewayRoute(.messaging, .messagingDeleteConversation, .unary),
+    .pinConversation: GatewayRoute(.messaging, .messagingPinConversation, .unary),
+    .muteConversation: GatewayRoute(.messaging, .messagingMuteConversation, .unary),
+    .archiveConversation: GatewayRoute(.messaging, .messagingArchiveConversation, .unary),
+    .listMessages: GatewayRoute(.messaging, .messagingSyncMessages, .unary),
+    .sendMessage: GatewayRoute(.messaging, .messagingSendMessage, .unary),
+    .editMessage: GatewayRoute(.messaging, .messagingEditMessage, .unary),
+    .deleteMessage: GatewayRoute(.messaging, .messagingDeleteMessage, .unary),
+    .forwardMessage: GatewayRoute(.messaging, .messagingForwardMessage, .unary),
+    .reactToMessage: GatewayRoute(.messaging, .messagingReaction, .unary),
+    .markRead: GatewayRoute(.messaging, .messagingReadReceipt, .unary),
+    .addGroupMembers: GatewayRoute(.messaging, .messagingGroupAddMember, .unary),
+    .removeGroupMember: GatewayRoute(.messaging, .messagingGroupRemoveMember, .unary),
+    .updateMemberRole: GatewayRoute(.messaging, .messagingGroupUpdateRole, .unary),
+    .leaveGroup: GatewayRoute(.messaging, .messagingGroupLeave, .unary),
+    .createChannel: GatewayRoute(.messaging, .channelCreate, .unary),
+    .updateChannelSettings: GatewayRoute(.messaging, .channelUpdateSettings, .unary),
+    .recordPostView: GatewayRoute(.messaging, .channelRecordPostView, .unary),
+    .linkDiscussionGroup: GatewayRoute(.messaging, .channelLinkDiscussionGroup, .unary),
+    .searchPublicChannels: GatewayRoute(.messaging, .channelSearchPublic, .unary),
+    .sendTypingIndicator: GatewayRoute(.messaging, .typingStart, .unary),
+    .searchContacts: GatewayRoute(.messaging, .messagingSearchContacts, .unary),
+    .listContacts: GatewayRoute(.messaging, .messagingListContacts, .unary),
+    .blockContact: GatewayRoute(.messaging, .messagingBlockContact, .unary),
+    .unblockContact: GatewayRoute(.messaging, .messagingUnblockContact, .unary),
+    .subscribePresence: GatewayRoute(.presence, .presenceSubscribe, .serverStream),
+    .subscribeNewMessages: GatewayRoute(.messaging, .messagingStreamInit, .serverStream),
+    .subscribeTypingIndicators: GatewayRoute(.presence, .typingStart, .serverStream),
+    .subscribePresenceUpdates: GatewayRoute(.presence, .presenceUpdate, .serverStream),
+    .getFeed: GatewayRoute(.feed, .feedGetFeed, .unary),
+    .createPost: GatewayRoute(.feed, .feedCreatePost, .unary),
+    .deletePost: GatewayRoute(.feed, .feedDeletePost, .unary),
+    .editPost: GatewayRoute(.feed, .feedEditPost, .unary),
+    .likePost: GatewayRoute(.feed, .feedLikePost, .unary),
+    .repost: GatewayRoute(.feed, .feedRepost, .unary),
+    .bookmarkPost: GatewayRoute(.feed, .feedBookmarkPost, .unary),
+    .getPostThread: GatewayRoute(.feed, .feedGetPostThread, .unary),
+    .getUserPosts: GatewayRoute(.feed, .feedGetUserPosts, .unary),
+    .followUser: GatewayRoute(.feed, .feedFollowUser, .unary),
+    .subscribeFeedUpdates: GatewayRoute(.feed, .feedSubscribeUpdates, .serverStream),
+    .e2eUploadKeyPackages: GatewayRoute(.e2ECrypto, .e2EUploadKeyPackages, .unary),
+    .e2eFetchKeyPackage: GatewayRoute(.e2ECrypto, .e2EFetchKeyPackage, .unary),
+    .e2eUploadPrekeyBundle: GatewayRoute(.e2ECrypto, .e2EUploadPrekeyBundle, .unary),
+    .e2eFetchPrekeyBundle: GatewayRoute(.e2ECrypto, .e2EFetchPrekeyBundle, .unary),
+    .e2eSendGroupCommit: GatewayRoute(.e2ECrypto, .e2ESendGroupCommit, .unary),
+    .e2eSendGroupMessage: GatewayRoute(.e2ECrypto, .e2ESendGroupMessage, .unary),
+    .e2eSendWelcome: GatewayRoute(.e2ECrypto, .e2ESendWelcome, .unary),
+    .e2eFetchPendingEvents: GatewayRoute(.e2ECrypto, .e2EFetchPendingEvents, .unary),
+    .e2eAckEvents: GatewayRoute(.e2ECrypto, .e2EAckEvents, .unary),
+    .e2eDeviceLinkInit: GatewayRoute(.e2ECrypto, .e2EDeviceLinkInit, .unary),
+    .e2eDeviceLinkComplete: GatewayRoute(.e2ECrypto, .e2EDeviceLinkComplete, .unary),
+    .e2ePendingEventsStream: GatewayRoute(.e2ECrypto, .e2EPendingEventsStream, .serverStream),
+  ]
+
+  static func route(for serviceType: RpcServiceType) -> GatewayRoute? {
+    routes[serviceType]
+  }
+}

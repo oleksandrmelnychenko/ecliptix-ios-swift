@@ -1,0 +1,21 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.protocol;
+option csharp_namespace = "Ecliptix.Protobuf.SecureProtocol";
+option swift_prefix = "Proto";
+
+import "common/pub_key_exchange.proto";
+
+message EcliptixSessionState {
+  uint32 connect_id = 1;
+  bytes peer_handshake_init = 2;
+  bytes native_state = 3;
+  bytes membership_id = 4;
+  bytes account_id = 5;
+  bytes identity_seed = 6;
+  uint32 sending_chain_index = 7;
+  uint32 receiving_chain_index = 8;
+  ecliptix.proto.protocol.PubKeyExchangeType exchange_type = 9;
+}

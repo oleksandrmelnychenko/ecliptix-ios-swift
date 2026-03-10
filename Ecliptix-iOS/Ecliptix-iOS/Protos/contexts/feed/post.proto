@@ -1,0 +1,82 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+
+package ecliptix.proto.feed;
+option csharp_namespace = "Ecliptix.Protobuf.Feed";
+option swift_prefix = "Proto";
+
+enum PostType {
+  POST_TYPE_UNSPECIFIED = 0;
+  POST_TYPE_ORIGINAL = 1;
+  POST_TYPE_REPLY = 2;
+  POST_TYPE_REPOST = 3;
+  POST_TYPE_QUOTE = 4;
+}
+
+enum PostVisibility {
+  POST_VISIBILITY_UNSPECIFIED = 0;
+  POST_VISIBILITY_PUBLIC = 1;
+  POST_VISIBILITY_FOLLOWERS_ONLY = 2;
+  POST_VISIBILITY_MENTIONED_ONLY = 3;
+}
+
+message PostAuthor {
+  bytes membership_id = 1;
+  string display_name = 2;
+  string profile_name = 3;
+  optional string avatar_url = 4;
+  bool is_verified = 5;
+  bytes account_id = 6;
+}
+
+message PostMedia {
+  string media_id = 1;
+  string url = 2;
+  optional string thumbnail_url = 3;
+  string mime_type = 4;
+  int64 size_bytes = 5;
+  optional int32 width = 6;
+  optional int32 height = 7;
+  optional int32 duration_seconds = 8;
+  optional string alt_text = 9;
+  int32 sort_order = 10;
+}
+
+message PostMetrics {
+  int64 reply_count = 1;
+  int64 repost_count = 2;
+  int64 like_count = 3;
+  int64 quote_count = 4;
+  int64 view_count = 5;
+  int64 bookmark_count = 6;
+}
+
+message PostInteractionState {
+  bool liked = 1;
+  bool reposted = 2;
+  bool bookmarked = 3;
+}
+
+message Post {
+  bytes post_id = 1;
+  PostAuthor author = 2;
+  PostType post_type = 3;
+  PostVisibility visibility = 4;
+  string text_content = 5;
+  repeated PostMedia media = 6;
+  optional bytes parent_post_id = 7;
+  optional bytes quoted_post_id = 8;
+  optional Post quoted_post = 9;
+  optional bytes reposted_post_id = 10;
+  optional Post reposted_post = 11;
+  PostMetrics metrics = 12;
+  PostInteractionState interaction = 13;
+  google.protobuf.Timestamp created_at = 14;
+  optional google.protobuf.Timestamp edited_at = 15;
+  bool is_deleted = 16;
+  optional bytes conversation_thread_id = 17;
+  int32 reply_depth = 18;
+}

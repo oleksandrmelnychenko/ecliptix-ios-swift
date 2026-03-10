@@ -1,0 +1,73 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.account;
+option csharp_namespace = "Ecliptix.Protobuf.Account";
+option swift_prefix = "";
+
+enum AccountType {
+  ACCOUNT_TYPE_UNSPECIFIED = 0;
+  ACCOUNT_TYPE_PERSONAL = 1;
+  ACCOUNT_TYPE_MILITARY = 2;
+  ACCOUNT_TYPE_BUSINESS = 3;
+}
+
+enum AccountStatus {
+  ACCOUNT_STATUS_UNSPECIFIED = 0;
+  ACCOUNT_STATUS_INACTIVE = 1;
+  ACCOUNT_STATUS_ACTIVE = 2;
+  ACCOUNT_STATUS_SUSPENDED = 3;
+  ACCOUNT_STATUS_LOCKED = 4;
+}
+
+message Account {
+  bytes account_id = 1;
+  bytes membership_id = 2;
+  AccountType account_type = 3;
+  AccountStatus status = 5;
+  bool is_default_account = 6;
+  optional string preferred_language = 7;
+  optional string time_zone_id = 8;
+  optional string region = 9;
+}
+
+message AccountProfile {
+  bytes profile_id = 1;
+  bytes account_id = 2;
+  string profile_name = 3;
+  string display_name = 4;
+}
+
+message ProfileNameAvailabilityRequest {
+  string profile_name = 1;
+}
+
+message ProfileNameAvailabilityResponse {
+  bool is_available = 1;
+  string reason = 2;
+}
+
+message ProfileUpsertRequest {
+  bytes account_id = 1;
+  string profile_name = 2;
+  string display_name = 3;
+}
+
+message ProfileUpsertResponse {
+  AccountProfile profile = 1;
+  bool is_success = 2;
+}
+
+message ProfileLookupRequest {
+  bytes current_account_id = 1;
+  oneof search_criteria {
+    string by_mobile_number = 2;
+    bytes by_account_id = 3;
+    string by_username = 4;
+  }
+}
+
+message ProfileLookupResponse {
+  optional AccountProfile profile = 1;
+}

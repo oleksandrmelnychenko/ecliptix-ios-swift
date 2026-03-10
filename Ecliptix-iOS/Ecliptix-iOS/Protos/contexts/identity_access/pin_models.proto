@@ -1,0 +1,85 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.membership;
+option csharp_namespace = "Ecliptix.Protobuf.Membership";
+option swift_prefix = "";
+
+enum PinOpaqueResult {
+  PIN_OPAQUE_RESULT_UNSPECIFIED = 0;
+  PIN_OPAQUE_RESULT_SUCCEEDED = 1;
+  PIN_OPAQUE_RESULT_FAILED = 2;
+  PIN_OPAQUE_RESULT_INVALID_PIN_LENGTH = 3;
+  PIN_OPAQUE_RESULT_ACCOUNT_NOT_FOUND = 4;
+  PIN_OPAQUE_RESULT_NOT_REGISTERED = 5;
+  PIN_OPAQUE_RESULT_LOCKED = 6;
+  PIN_OPAQUE_RESULT_ATTEMPTS_EXCEEDED = 7;
+}
+
+message PinRegisterInitRequest {
+  bytes account_id = 1;
+  bytes peer_oprf = 2;
+  int32 pin_length = 3;
+  optional bytes device_id = 4;
+}
+
+message PinRegisterInitResponse {
+  bytes peer_oprf = 1;
+  PinOpaqueResult result = 2;
+  optional string message = 3;
+}
+
+message PinRegisterCompleteRequest {
+  bytes account_id = 1;
+  bytes peer_registration_record = 2;
+  int32 pin_length = 3;
+  optional bytes device_id = 4;
+}
+
+message PinRegisterCompleteResponse {
+  PinOpaqueResult result = 1;
+  optional string message = 2;
+}
+
+message PinVerifyInitRequest {
+  bytes account_id = 1;
+  bytes peer_oprf = 2;
+  optional bytes device_id = 3;
+}
+
+message PinVerifyInitResponse {
+  bytes server_oprf_response = 1;
+  bytes server_ephemeral_public_key = 2;
+  bytes registration_record = 3;
+  bytes server_state_token = 4;
+  bytes server_mac = 5;
+  PinOpaqueResult result = 6;
+  optional string message = 7;
+  optional uint32 attempts_remaining = 8;
+  optional uint32 lockout_seconds = 9;
+}
+
+message PinVerifyFinalizeRequest {
+  bytes account_id = 1;
+  bytes client_ephemeral_public_key = 2;
+  bytes client_mac = 3;
+  bytes server_state_token = 4;
+}
+
+message PinVerifyFinalizeResponse {
+  PinOpaqueResult result = 1;
+  optional string message = 2;
+  optional uint32 attempts_remaining = 3;
+  optional uint32 lockout_seconds = 4;
+}
+
+message PinDisableRequest {
+  bytes account_id = 1;
+}
+
+message PinDisableResponse {
+  PinOpaqueResult result = 1;
+  optional string message = 2;
+  uint64 disabled_count = 3;
+}

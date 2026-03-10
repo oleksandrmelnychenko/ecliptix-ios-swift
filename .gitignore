@@ -1,0 +1,30 @@
+.DS_Store
+
+# SwiftPM local packages (external dependencies, fetched separately)
+LocalPackages/
+
+# Xcode/Swift build artifacts
+DerivedData/
+.derivedData-device/
+
+# Local IDE/build server metadata
+**/buildServer.json
+
+# Local binary package backups and artifacts
+*.xcframework/
+*.xcframework
+*.xcframework.bak/
+*.xcframework.bak
+
+# Build output
+build/
+
+# Compiled object files
+*.o
+
+# Xcode user state
+*.xcuserstate
+xcuserdata/
+
+# Generated proto files (regenerated from .proto sources)
+Ecliptix-iOS/Ecliptix-iOS/Protos/Generated/

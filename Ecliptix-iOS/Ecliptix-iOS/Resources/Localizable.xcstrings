@@ -1,0 +1,2487 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "@" : {
+
+    },
+    "@username" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@імʼя користувача"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, select country" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, обрати країну"
+          }
+        }
+      }
+    },
+    "%lld percent" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld відсотків"
+          }
+        }
+      }
+    },
+    "•" : {
+
+    },
+    "3-30 characters, letters, numbers, and underscore only" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3-30 символів, літери, цифри та підкреслення"
+          }
+        }
+      }
+    },
+    "A clean workspace built for speed, focus, and daily progress." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чистий робочий простір для швидкості, фокусу та щоденного прогресу."
+          }
+        }
+      }
+    },
+    "Account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обліковий запис"
+          }
+        }
+      }
+    },
+    "Add Photo" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додати фото"
+          }
+        }
+      }
+    },
+    "Appearance" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зовнішній вигляд"
+          }
+        }
+      }
+    },
+    "Ask anything instantly" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запитайте будь-що миттєво"
+          }
+        }
+      }
+    },
+    "At least 8 characters long" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мінімум 8 символів"
+          }
+        }
+      }
+    },
+    "Available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступний"
+          }
+        }
+      }
+    },
+    "Back" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад"
+          }
+        }
+      }
+    },
+    "Account Locked" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обліковий запис заблоковано"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скасувати"
+          }
+        }
+      }
+    },
+    "Confirm PIN" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердьте PIN"
+          }
+        }
+      }
+    },
+    "Continue Later" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продовжити пізніше"
+          }
+        }
+      }
+    },
+    "Continue to Setup" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продовжити налаштування"
+          }
+        }
+      }
+    },
+    "Create PIN" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створіть PIN"
+          }
+        }
+      }
+    },
+    "Create a 4-digit PIN for quick access to your account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створіть 4-значний PIN для швидкого доступу до облікового запису"
+          }
+        }
+      }
+    },
+    "Cannot connect to the server. Please check your internet connection and try again." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдається підключитися до сервера. Перевірте підключення до інтернету та спробуйте ще раз."
+          }
+        }
+      }
+    },
+    "Change Number" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Змінити номер"
+          }
+        }
+      }
+    },
+    "Checked" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обрано"
+          }
+        }
+      }
+    },
+    "Checking availability..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірка доступності..."
+          }
+        }
+      }
+    },
+    "Checking rate limits..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірка лімітів..."
+          }
+        }
+      }
+    },
+    "Checking session status..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірка стану сесії..."
+          }
+        }
+      }
+    },
+    "Clear follow-up suggestions" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чіткі подальші рекомендації"
+          }
+        }
+      }
+    },
+    "Clearing local data" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очищення локальних даних"
+          }
+        }
+      }
+    },
+    "Code expired - request a new one" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код закінчився — запросіть новий"
+          }
+        }
+      }
+    },
+    "Code expires in %ds" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код закінчується через %dс"
+          }
+        }
+      }
+    },
+    "Complete Profile" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершити профіль"
+          }
+        }
+      }
+    },
+    "Complete Registration" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершити реєстрацію"
+          }
+        }
+      }
+    },
+    "Complete Your Profile" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершіть ваш профіль"
+          }
+        }
+      }
+    },
+    "Confirm Secure Key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердіть секретний ключ"
+          }
+        }
+      }
+    },
+    "Contains lowercase letter" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Містить малу літеру"
+          }
+        }
+      }
+    },
+    "Contains number" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Містить цифру"
+          }
+        }
+      }
+    },
+    "Contains special character" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Містить спеціальний символ"
+          }
+        }
+      }
+    },
+    "Contains uppercase letter" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Містить велику літеру"
+          }
+        }
+      }
+    },
+    "Context saved across the flow" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Контекст зберігається протягом сесії"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продовжити"
+          }
+        }
+      }
+    },
+    "Create a new secure key for your account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створіть новий секретний ключ для облікового запису"
+          }
+        }
+      }
+    },
+    "Create a strong secure key to protect your account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створіть надійний секретний ключ для захисту облікового запису"
+          }
+        }
+      }
+    },
+    "Create Account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створити обліковий запис"
+          }
+        }
+      }
+    },
+    "Create Secure Key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створити секретний ключ"
+          }
+        }
+      }
+    },
+    "Create your unique profile name" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створіть унікальне ім'я профілю"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Темна"
+          }
+        }
+      }
+    },
+    "Device registration failed" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка реєстрації пристрою"
+          }
+        }
+      }
+    },
+    "Device-aware session checks" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірка сесій з прив'язкою до пристрою"
+          }
+        }
+      }
+    },
+    "Didn't receive code?" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не отримали код?"
+          }
+        }
+      }
+    },
+    "Digit %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Digit %1$lld of %2$lld"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цифра %1$lld з %2$lld"
+          }
+        }
+      }
+    },
+    "Display Name (Optional)" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я для відображення (необов'язково)"
+          }
+        }
+      }
+    },
+    "Display name cannot have multiple consecutive spaces" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я для відображення не може містити кілька пробілів поспіль"
+          }
+        }
+      }
+    },
+    "Display name cannot start or end with spaces" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я для відображення не може починатися або закінчуватися пробілами"
+          }
+        }
+      }
+    },
+    "Display name contains invalid characters" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я для відображення містить недопустимі символи"
+          }
+        }
+      }
+    },
+    "Display name must be at least 2 characters" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я для відображення має містити мінімум 2 символи"
+          }
+        }
+      }
+    },
+    "Display name must be at most 50 characters" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я для відображення має містити не більше 50 символів"
+          }
+        }
+      }
+    },
+    "Don't have an account? **Sign Up**" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Немає облікового запису? **Зареєструватися**"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        }
+      }
+    },
+    "Ecliptix" : {
+
+    },
+    "Ecliptix logo" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Логотип Ecliptix"
+          }
+        }
+      }
+    },
+    "Empty" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порожньо"
+          }
+        }
+      }
+    },
+    "Enter the 6-digit code sent to" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть 6-значний код, надісланий на"
+          }
+        }
+      }
+    },
+    "Enter your credentials to access your account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть дані для входу в обліковий запис"
+          }
+        }
+      }
+    },
+    "Enter your mobile number and password to continue" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть номер телефону та пароль для продовження"
+          }
+        }
+      }
+    },
+    "Enter your mobile number to get started" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть номер телефону, щоб почати"
+          }
+        }
+      }
+    },
+    "Enter your mobile number to recover your secure key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть номер телефону для відновлення секретного ключа"
+          }
+        }
+      }
+    },
+    "Enter your mobile number to sign in" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть номер телефону для входу"
+          }
+        }
+      }
+    },
+    "Enter your secure key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть секретний ключ"
+          }
+        }
+      }
+    },
+    "Error" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка"
+          }
+        }
+      }
+    },
+    "Error: %@" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка: %@"
+          }
+        }
+      }
+    },
+    "Failed to load settings" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити налаштування"
+          }
+        }
+      }
+    },
+    "Failed to resend OTP" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося повторно надіслати код"
+          }
+        }
+      }
+    },
+    "Fair" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задовільний"
+          }
+        }
+      }
+    },
+    "Finalizing..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершення..."
+          }
+        }
+      }
+    },
+    "Finish onboarding" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершити ознайомлення"
+          }
+        }
+      }
+    },
+    "Forgot key?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forgot key?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Забули ключ?"
+          }
+        }
+      }
+    },
+    "Get direct answers with context-aware help, right when you need it." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отримуйте прямі відповіді з контекстною допомогою саме тоді, коли вам потрібно."
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почати"
+          }
+        }
+      }
+    },
+    "Go to next step" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти до наступного кроку"
+          }
+        }
+      }
+    },
+    "Good" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добрий"
+          }
+        }
+      }
+    },
+    "Helpful status and feedback states" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Корисні статуси та зворотний зв'язок"
+          }
+        }
+      }
+    },
+    "Home" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Головна"
+          }
+        }
+      }
+    },
+    "I agree to the Terms of Service and Privacy Policy" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Я погоджуюсь з Умовами використання та Політикою конфіденційності"
+          }
+        }
+      }
+    },
+    "Initialization Failed" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка ініціалізації"
+          }
+        }
+      }
+    },
+    "Invalid OTP code" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Невірний код підтвердження"
+          }
+        }
+      }
+    },
+    "John Doe" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Іван Петренко"
+          }
+        }
+      }
+    },
+    "Light" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Світла"
+          }
+        }
+      }
+    },
+    "Loading..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading..."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантаження..."
+          }
+        }
+      }
+    },
+    "Loading settings..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантаження налаштувань..."
+          }
+        }
+      }
+    },
+    "Logout Error" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка виходу"
+          }
+        }
+      }
+    },
+    "Messages" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повідомлення"
+          }
+        }
+      }
+    },
+    "Minimal, distraction-free interface" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мінімалістичний інтерфейс без відволікань"
+          }
+        }
+      }
+    },
+    "Missing membership ID for registration" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відсутній ідентифікатор членства для реєстрації"
+          }
+        }
+      }
+    },
+    "Mobile Number" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Номер телефону"
+          }
+        }
+      }
+    },
+    "Mobile number is required" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Номер телефону обов'язковий"
+          }
+        }
+      }
+    },
+    "Mobile number must be 7-15 digits" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Номер телефону має містити від 7 до 15 цифр"
+          }
+        }
+      }
+    },
+    "Mobile number must contain only digits" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Номер телефону має містити лише цифри"
+          }
+        }
+      }
+    },
+    "Move faster every day" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рухайтесь швидше щодня"
+          }
+        }
+      }
+    },
+    "No internet connection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No internet connection"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Немає підключення до інтернету"
+          }
+        }
+      }
+    },
+    "No account found with this mobile number" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обліковий запис з цим номером не знайдено"
+          }
+        }
+      }
+    },
+    "No active verification session" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Немає активної сесії підтвердження"
+          }
+        }
+      }
+    },
+    "No verification session available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сесія підтвердження недоступна"
+          }
+        }
+      }
+    },
+    "Notifying server" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сповіщення сервера"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гаразд"
+          }
+        }
+      }
+    },
+    "One-tap start to continue" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Один дотик для продовження"
+          }
+        }
+      }
+    },
+    "Page %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Page %1$lld of %2$lld"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сторінка %1$lld з %2$lld"
+          }
+        }
+      }
+    },
+    "Password" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пароль"
+          }
+        }
+      }
+    },
+    "Please accept Terms of Service and Privacy Policy" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прийміть Умови використання та Політику конфіденційності"
+          }
+        }
+      }
+    },
+    "Please confirm your secure key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердіть секретний ключ"
+          }
+        }
+      }
+    },
+    "Please try again later" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спробуйте пізніше"
+          }
+        }
+      }
+    },
+    "Preparing session..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підготовка сесії..."
+          }
+        }
+      }
+    },
+    "Privacy" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфіденційність"
+          }
+        }
+      }
+    },
+    "Privacy Policy" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Політика конфіденційності"
+          }
+        }
+      }
+    },
+    "Profile" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Профіль"
+          }
+        }
+      }
+    },
+    "Profile Name" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я профілю"
+          }
+        }
+      }
+    },
+    "Profile name can only contain letters, numbers, and underscores" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я профілю може містити лише літери, цифри та підкреслення"
+          }
+        }
+      }
+    },
+    "Profile name must be at least 3 characters" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я профілю має містити мінімум 3 символи"
+          }
+        }
+      }
+    },
+    "Profile name must be at most 30 characters" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я профілю має містити не більше 30 символів"
+          }
+        }
+      }
+    },
+    "Profile name must start with a letter or number" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я профілю має починатися з літери або цифри"
+          }
+        }
+      }
+    },
+    "Profile photo" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фото профілю"
+          }
+        }
+      }
+    },
+    "Progress" : {
+
+    },
+    "Protect your account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Захистіть свій обліковий запис"
+          }
+        }
+      }
+    },
+    "Recover Key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відновити ключ"
+          }
+        }
+      }
+    },
+    "Recover Secure Key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відновити секретний ключ"
+          }
+        }
+      }
+    },
+    "Redirecting in %ds..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перенаправлення через %dс..."
+          }
+        }
+      }
+    },
+    "Redirecting in %llds..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перенаправлення через %lldс..."
+          }
+        }
+      }
+    },
+    "Registration service is not configured" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервіс реєстрації не налаштовано"
+          }
+        }
+      }
+    },
+    "Request new code in %ds" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новий код через %dс"
+          }
+        }
+      }
+    },
+    "Requirements" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вимоги"
+          }
+        }
+      }
+    },
+    "Requirements Met" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вимоги виконано"
+          }
+        }
+      }
+    },
+    "Resend Code" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Надіслати код повторно"
+          }
+        }
+      }
+    },
+    "Resend verification code" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторно надіслати код підтвердження"
+          }
+        }
+      }
+    },
+    "Reset Key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скинути ключ"
+          }
+        }
+      }
+    },
+    "Reset Secure Key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скинути секретний ключ"
+          }
+        }
+      }
+    },
+    "Restore complete" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відновлення завершено"
+          }
+        }
+      }
+    },
+    "Restore Failed" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка відновлення"
+          }
+        }
+      }
+    },
+    "Restoring session..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відновлення сесії..."
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторити"
+          }
+        }
+      }
+    },
+    "Retry restoring session" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторити відновлення сесії"
+          }
+        }
+      }
+    },
+    "Search countries" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук країн"
+          }
+        }
+      }
+    },
+    "Secrecy channel initialization failed" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка ініціалізації безпечного каналу"
+          }
+        }
+      }
+    },
+    "Secure by Design" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безпека за замовчуванням"
+          }
+        }
+      }
+    },
+    "Secure Key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секретний ключ"
+          }
+        }
+      }
+    },
+    "Secure key does not meet all requirements" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секретний ключ не відповідає всім вимогам"
+          }
+        }
+      }
+    },
+    "Secure key is required" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секретний ключ обов'язковий"
+          }
+        }
+      }
+    },
+    "Secure key protection by default" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Захист секретним ключем за замовчуванням"
+          }
+        }
+      }
+    },
+    "Secure keys do not match" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секретні ключі не збігаються"
+          }
+        }
+      }
+    },
+    "Securely clearing your data" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безпечне очищення ваших даних"
+          }
+        }
+      }
+    },
+    "Security" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безпека"
+          }
+        }
+      }
+    },
+    "Security Limit Reached" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Досягнуто ліміт безпеки"
+          }
+        }
+      }
+    },
+    "Security runs quietly in the background so you can stay focused." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безпека працює непомітно у фоні, щоб ви могли зосередитись."
+          }
+        }
+      }
+    },
+    "Select Country" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обрати країну"
+          }
+        }
+      }
+    },
+    "Sending code" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Надсилання коду"
+          }
+        }
+      }
+    },
+    "Sending new code..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Надсилання нового коду..."
+          }
+        }
+      }
+    },
+    "Server Error" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка сервера"
+          }
+        }
+      }
+    },
+    "Server unavailable - please try again" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервер недоступний — спробуйте ще раз"
+          }
+        }
+      }
+    },
+    "Session expired" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сесія закінчилася"
+          }
+        }
+      }
+    },
+    "Session expired - please sign in again" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сесія закінчилася — увійдіть знову"
+          }
+        }
+      }
+    },
+    "Session not found - please try again" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сесію не знайдено — спробуйте ще раз"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Налаштування"
+          }
+        }
+      }
+    },
+    "Settings initialization failed" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка ініціалізації налаштувань"
+          }
+        }
+      }
+    },
+    "Sign In" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійти"
+          }
+        }
+      }
+    },
+    "Sign Up" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зареєструватися"
+          }
+        }
+      }
+    },
+    "Sign Out" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вийти"
+          }
+        }
+      }
+    },
+    "Sign Out?" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вийти?"
+          }
+        }
+      }
+    },
+    "Signing in" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вхід"
+          }
+        }
+      }
+    },
+    "Signing Out..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вихід..."
+          }
+        }
+      }
+    },
+    "Simple recovery options" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прості варіанти відновлення"
+          }
+        }
+      }
+    },
+    "Skip" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустити"
+          }
+        }
+      }
+    },
+    "Skip for now" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустити"
+          }
+        }
+      }
+    },
+    "Smart chat with fast responses" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розумний чат зі швидкими відповідями"
+          }
+        }
+      }
+    },
+    "Something went wrong while starting the app. Please try again." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щось пішло не так під час запуску додатку. Спробуйте ще раз."
+          }
+        }
+      }
+    },
+    "Step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Step %1$lld of %2$lld"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок %1$lld з %2$lld"
+          }
+        }
+      }
+    },
+    "Step 1 of 3" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок 1 з 3"
+          }
+        }
+      }
+    },
+    "Step 1 of 4" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок 1 з 4"
+          }
+        }
+      }
+    },
+    "Step 3 of 3" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок 3 з 3"
+          }
+        }
+      }
+    },
+    "Step 3 of 4" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок 3 з 4"
+          }
+        }
+      }
+    },
+    "Step 4 of 4" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок 4 з 4"
+          }
+        }
+      }
+    },
+    "Strength: %@" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Надійність: %@"
+          }
+        }
+      }
+    },
+    "Strong" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Надійний"
+          }
+        }
+      }
+    },
+    "Submit secure key" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердити секретний ключ"
+          }
+        }
+      }
+    },
+    "System" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Системна"
+          }
+        }
+      }
+    },
+    "Tap to change" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Торкніться, щоб змінити"
+          }
+        }
+      }
+    },
+    "Terms of Service" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Умови використання"
+          }
+        }
+      }
+    },
+    "Theme" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тема"
+          }
+        }
+      }
+    },
+    "This mobile number is already registered" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей номер телефону вже зареєстровано"
+          }
+        }
+      }
+    },
+    "This profile name is reserved" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Це ім'я профілю зарезервовано"
+          }
+        }
+      }
+    },
+    "Too many attempts - please try again later" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Занадто багато спроб — спробуйте пізніше"
+          }
+        }
+      }
+    },
+    "Too many attempts. Returning to start..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Занадто багато спроб. Повернення на початок..."
+          }
+        }
+      }
+    },
+    "Too many failed attempts" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Занадто багато невдалих спроб"
+          }
+        }
+      }
+    },
+    "Unchecked" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не обрано"
+          }
+        }
+      }
+    },
+    "Use your account number to continue sign in" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використайте номер облікового запису для продовження входу"
+          }
+        }
+      }
+    },
+    "Use your registered number to recover access" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використайте зареєстрований номер для відновлення доступу"
+          }
+        }
+      }
+    },
+    "User Name" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ім'я користувача"
+          }
+        }
+      }
+    },
+    "username" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "імʼя користувача"
+          }
+        }
+      }
+    },
+    "Validating code..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Валідація коду..."
+          }
+        }
+      }
+    },
+    "Verification failed" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка підтвердження"
+          }
+        }
+      }
+    },
+    "Verify" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердити"
+          }
+        }
+      }
+    },
+    "Verify code" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердити код"
+          }
+        }
+      }
+    },
+    "Verify Code" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердити код"
+          }
+        }
+      }
+    },
+    "Verifying code..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірка коду..."
+          }
+        }
+      }
+    },
+    "Verifying session..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірка сесії..."
+          }
+        }
+      }
+    },
+    "Verifying signature..." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірка підпису..."
+          }
+        }
+      }
+    },
+    "Very Strong" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дуже надійний"
+          }
+        }
+      }
+    },
+    "We will send a verification code to this number" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ми надішлемо код підтвердження на цей номер"
+          }
+        }
+      }
+    },
+    "We'll send you a verification code" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ми надішлемо вам код підтвердження"
+          }
+        }
+      }
+    },
+    "Weak" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Слабкий"
+          }
+        }
+      }
+    },
+    "Return to previous screen" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повернутися до попереднього екрана"
+          }
+        }
+      }
+    },
+    "Enter PIN" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введіть PIN"
+          }
+        }
+      }
+    },
+    "Incorrect PIN. %d attempts remaining." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неправильний PIN. Залишилося спроб: %d."
+          }
+        }
+      }
+    },
+    "Incorrect PIN. Please try again." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неправильний PIN. Спробуйте ще раз."
+          }
+        }
+      }
+    },
+    "Missing membership information" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відсутня інформація про членство"
+          }
+        }
+      }
+    },
+    "No incomplete registration found" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Незавершену реєстрацію не знайдено"
+          }
+        }
+      }
+    },
+    "PINs don't match. Please try again." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PIN-коди не збігаються. Спробуйте ще раз."
+          }
+        }
+      }
+    },
+    "Re-enter your 4-digit PIN to confirm" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторно введіть 4-значний PIN для підтвердження"
+          }
+        }
+      }
+    },
+    "Step 4 of 5" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок 4 з 5"
+          }
+        }
+      }
+    },
+    "Step 5 of 5" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крок 5 з 5"
+          }
+        }
+      }
+    },
+    "Too many failed attempts. Please try again later." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Забагато невдалих спроб. Спробуйте пізніше."
+          }
+        }
+      }
+    },
+    "Verify PIN" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтвердити PIN"
+          }
+        }
+      }
+    },
+    "Welcome" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ласкаво просимо"
+          }
+        }
+      }
+    },
+    "Welcome Back" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "З поверненням"
+          }
+        }
+      }
+    },
+    "You have an incomplete registration. Would you like to continue setting up your account?" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У вас є незавершена реєстрація. Хочете продовжити налаштування облікового запису?"
+          }
+        }
+      }
+    },
+    "You'll need to sign in again to access your account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вам потрібно буде увійти знову для доступу до облікового запису"
+          }
+        }
+      }
+    },
+    "AI Powered Safety" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безпека на основі ШІ"
+          }
+        }
+      }
+    },
+    "Choose your preferred language" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оберіть бажану мову"
+          }
+        }
+      }
+    },
+    "Connect with friends in verified, positive spaces designed for your safety" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спілкуйтеся з друзями у перевірених, позитивних просторах, створених для вашої безпеки"
+          }
+        }
+      }
+    },
+    "Ecliptix Protection Protocol" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Протокол захисту Ecliptix"
+          }
+        }
+      }
+    },
+    "End-to-end encrypted communications" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наскрізне шифрування комунікацій"
+          }
+        }
+      }
+    },
+    "English" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English"
+          }
+        }
+      }
+    },
+    "It looks like you're in %@" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Схоже, ви у регіоні %@"
+          }
+        }
+      }
+    },
+    "Mental Protection" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ментальний захист"
+          }
+        }
+      }
+    },
+    "Offline" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Офлайн"
+          }
+        }
+      }
+    },
+    "Online" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Онлайн"
+          }
+        }
+      }
+    },
+    "Passwords and PIN never leave device" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Паролі та PIN ніколи не залишають пристрій"
+          }
+        }
+      }
+    },
+    "Perfect forward secrecy for all messages" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfect Forward Secrecy для всіх повідомлень"
+          }
+        }
+      }
+    },
+    "Real-time content filtering and emotional support when you need it most" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фільтрація контенту в реальному часі та емоційна підтримка, коли це найбільше потрібно"
+          }
+        }
+      }
+    },
+    "Smart Communities" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розумні спільноти"
+          }
+        }
+      }
+    },
+    "Supported languages" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підтримувані мови"
+          }
+        }
+      }
+    },
+    "Switch to %@?" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемкнутися на %@?"
+          }
+        }
+      }
+    },
+    "Track your emotional health with insights and suggestions from our AI" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відстежуйте емоційний стан за допомогою інсайтів і підказок від нашого ШІ"
+          }
+        }
+      }
+    },
+    "Ukrainian" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Українська"
+          }
+        }
+      }
+    },
+    "Wellness First" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Турбота про добробут"
+          }
+        }
+      }
+    },
+    "Your personal AI companion monitors and protects your mental wellbeing" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш персональний AI-помічник стежить і піклується про ваш ментальний добробут"
+          }
+        }
+      }
+    },
+    "© 2026 Horizon Dynamics. All rights reserved." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "© 2026 Horizon Dynamics. Усі права захищено."
+          }
+        }
+      }
+    },
+    "Your public name (can be changed later)" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваше публічне ім'я (можна змінити пізніше)"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

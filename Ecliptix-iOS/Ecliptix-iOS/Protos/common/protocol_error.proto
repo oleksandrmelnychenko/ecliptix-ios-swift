@@ -1,0 +1,16 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.protocol;
+option csharp_namespace = "Ecliptix.Protobuf.Protocol";
+option swift_prefix = "Proto";
+
+import "google/protobuf/timestamp.proto";
+
+message EnvelopeError {
+  string error_code = 1;
+  string error_message = 2;
+  optional uint32 retry_after_seconds = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}

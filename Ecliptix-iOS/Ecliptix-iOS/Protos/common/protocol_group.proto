@@ -1,0 +1,211 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.protocol;
+option csharp_namespace = "Ecliptix.Protobuf.Protocol";
+option swift_prefix = "Proto";
+
+import "google/protobuf/timestamp.proto";
+
+message GroupKeyPackage {
+  uint32 version = 1;
+  bytes identity_ed25519_public = 2;
+  bytes identity_x25519_public = 3;
+  bytes leaf_x25519_public = 4;
+  bytes leaf_kyber_public = 5;
+  bytes signature = 6;
+  bytes credential = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message GroupTreeNode {
+  uint32 node_index = 1;
+  bytes x25519_public = 2;
+  bytes kyber_public = 3;
+  bytes x25519_private = 4;
+  bytes kyber_secret = 5;
+  bytes parent_hash = 6;
+  optional GroupKeyPackage key_package = 7;
+}
+
+message GroupProposal {
+  oneof proposal {
+    GroupAddProposal add = 1;
+    GroupRemoveProposal remove = 2;
+    GroupUpdateProposal update = 3;
+    GroupExternalInitProposal external_init = 4;
+    GroupPskProposal psk = 5;
+    GroupReInitProposal re_init = 6;
+  }
+}
+
+message GroupExternalInitProposal {
+  bytes ephemeral_x25519_public = 1;
+  bytes kyber_ciphertext = 2;
+}
+
+message GroupPskProposal {
+  bytes psk_id = 1;
+  bytes psk_nonce = 2;
+}
+
+message GroupReInitProposal {
+  bytes new_group_id = 1;
+  uint32 new_version = 2;
+}
+
+message GroupAddProposal {
+  GroupKeyPackage key_package = 1;
+}
+
+message GroupRemoveProposal {
+  uint32 removed_leaf_index = 1;
+}
+
+message GroupUpdateProposal {
+  bytes leaf_x25519_public = 1;
+  bytes leaf_kyber_public = 2;
+}
+
+message GroupCommit {
+  uint32 committer_leaf_index = 1;
+  repeated GroupProposal proposals = 2;
+  GroupUpdatePath update_path = 3;
+  bytes confirmation_mac = 4;
+  uint64 epoch = 5;
+  bytes group_id = 6;
+  bytes committer_signature = 7;
+}
+
+message GroupUpdatePath {
+  bytes leaf_x25519_public = 1;
+  bytes leaf_kyber_public = 2;
+  repeated GroupUpdatePathNode nodes = 3;
+}
+
+message GroupUpdatePathNode {
+  bytes x25519_public = 1;
+  bytes kyber_public = 2;
+  repeated GroupHybridCiphertext encrypted_path_secrets = 3;
+  bytes parent_hash = 4;
+}
+
+message GroupHybridCiphertext {
+  bytes ephemeral_x25519_public = 1;
+  bytes kyber_ciphertext = 2;
+  bytes encrypted_secret = 3;
+  bytes nonce = 4;
+}
+
+message GroupWelcome {
+  uint32 version = 1;
+  bytes group_id = 2;
+  uint64 epoch = 3;
+  bytes encrypted_group_info = 4;
+  bytes welcome_nonce = 5;
+  GroupHybridCiphertext encrypted_joiner_secret = 6;
+  bytes tree_hash = 7;
+  uint32 target_leaf_index = 8;
+}
+
+message GroupInfo {
+  bytes group_id = 1;
+  uint64 epoch = 2;
+  repeated GroupTreeNode tree_nodes = 3;
+  bytes group_context_hash = 4;
+  bytes confirmation_mac = 5;
+}
+
+message GroupMessage {
+  uint32 version = 1;
+  bytes group_id = 2;
+  uint64 epoch = 3;
+  oneof content {
+    GroupApplicationMessage application = 4;
+    GroupCommit commit = 5;
+    GroupWelcome welcome = 6;
+  }
+}
+
+message GroupApplicationMessage {
+  bytes encrypted_sender_data = 1;
+  bytes sender_data_nonce = 2;
+  bytes encrypted_payload = 3;
+  bytes payload_nonce = 4;
+  bytes franking_tag = 5;
+}
+
+message GroupPublicState {
+  uint32 version = 1;
+  bytes group_id = 2;
+  uint64 epoch = 3;
+  repeated GroupTreeNode tree_nodes = 4;
+  bytes group_context_hash = 5;
+  bytes confirmation_mac = 6;
+  bytes external_x25519_public = 7;
+  bytes external_kyber_public = 8;
+}
+
+message GroupSenderData {
+  uint32 sender_leaf_index = 1;
+  uint32 generation = 2;
+  bytes reuse_guard = 3;
+}
+
+enum GroupContentType {
+  GROUP_CONTENT_TYPE_NORMAL = 0;
+  GROUP_CONTENT_TYPE_SEALED = 1;
+  GROUP_CONTENT_TYPE_DISAPPEARING = 2;
+  GROUP_CONTENT_TYPE_SEALED_DISAPPEARING = 3;
+}
+
+message GroupMessagePolicy {
+  GroupContentType content_type = 1;
+  uint32 ttl_seconds = 2;
+  uint64 sent_timestamp = 3;
+}
+
+message GroupPlaintext {
+  bytes content = 1;
+  GroupMessagePolicy policy = 2;
+  bytes franking_key = 3;
+  bytes sealed_content = 4;
+  bytes sealed_nonce = 5;
+}
+
+message GroupProtocolState {
+  uint32 version = 1;
+  bytes group_id = 2;
+  uint64 epoch = 3;
+  uint32 my_leaf_index = 4;
+  repeated GroupTreeNode tree_nodes = 5;
+  bytes epoch_secret = 6;
+  bytes init_secret = 7;
+  bytes metadata_key = 8;
+  bytes confirmation_key = 9;
+  bytes welcome_key = 10;
+  repeated GroupMemberSenderChain sender_chains = 12;
+  bytes my_identity_ed25519_public = 20;
+  bytes my_identity_x25519_public = 21;
+  bytes group_context_hash = 22;
+  repeated bytes seen_message_ids = 23;
+  bytes state_hmac = 24;
+  uint64 state_counter = 25;
+  uint64 nonce_counter = 26;
+  google.protobuf.Timestamp created_at = 27;
+}
+
+message GroupMemberSenderChain {
+  uint32 leaf_index = 1;
+  bytes chain_key = 2;
+  uint32 generation = 3;
+}
+
+message SealedGroupState {
+  uint32 version = 1;
+  bytes dek_nonce = 2;
+  bytes state_nonce = 3;
+  bytes encrypted_dek = 4;
+  bytes encrypted_state = 5;
+}

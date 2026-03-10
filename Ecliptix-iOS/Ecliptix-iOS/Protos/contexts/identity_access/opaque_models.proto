@@ -1,0 +1,95 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+import "contexts/identity_access/membership.proto";
+import "contexts/identity_access/account.proto";
+
+package ecliptix.proto.membership;
+option csharp_namespace = "Ecliptix.Protobuf.Membership";
+option swift_prefix = "";
+
+enum OpaqueOperationResult {
+  OPAQUE_OPERATION_RESULT_UNSPECIFIED = 0;
+  OPAQUE_OPERATION_RESULT_SUCCEEDED = 1;
+  OPAQUE_OPERATION_RESULT_INVALID_CREDENTIALS = 2;
+  OPAQUE_OPERATION_RESULT_LOGIN_ATTEMPTS_EXCEEDED = 3;
+  OPAQUE_OPERATION_RESULT_REGISTRATION_REQUIRED = 4;
+}
+
+message OpaqueRegistrationInitRequest {
+  bytes peer_oprf = 1;
+  bytes membership_id = 2;
+}
+
+message OpaqueRegistrationInitResponse {
+  bytes peer_oprf = 1;
+  OpaqueOperationResult result = 2;
+  optional string message = 3;
+  optional Membership membership = 4;
+}
+
+message OpaqueRegistrationCompleteRequest {
+  bytes peer_registration_record = 1;
+  bytes membership_id = 2;
+}
+
+message OpaqueRegistrationCompleteResponse {
+  OpaqueOperationResult result = 1;
+  optional string message = 2;
+  repeated ecliptix.proto.account.Account available_accounts = 4;
+  optional ecliptix.proto.account.Account active_account = 5;
+}
+
+message OpaqueSignInInitRequest {
+  string mobile_number = 1;
+  bytes peer_oprf = 2;
+}
+
+message OpaqueSignInInitResponse {
+  bytes server_oprf_response = 1;
+  bytes server_ephemeral_public_key = 2;
+  bytes registration_record = 3;
+  bytes server_state_token = 4;
+  optional string message = 5;
+  optional int32 minutes_until_retry = 6;
+  OpaqueOperationResult result = 7;
+  bytes server_mac = 8;
+}
+
+message OpaqueSignInFinalizeRequest {
+  string mobile_number = 1;
+  bytes client_ephemeral_public_key = 2;
+  bytes client_mac = 3;
+  bytes server_state_token = 4;
+}
+
+message OpaqueSignInFinalizeResponse {
+  bytes server_mac = 1;
+  optional Membership membership = 2;
+  OpaqueOperationResult result = 3;
+  optional string message = 4;
+  optional int32 minutes_until_retry = 5;
+  repeated ecliptix.proto.account.Account available_accounts = 6;
+  optional ecliptix.proto.account.Account active_account = 7;
+}
+
+message OpaqueRecoveryInitRequest {
+  bytes peer_oprf = 1;
+  bytes membership_id = 2;
+}
+
+message OpaqueRecoveryInitResponse {
+  bytes peer_oprf = 1;
+  OpaqueOperationResult result = 2;
+  optional string message = 3;
+  optional Membership membership = 4;
+}
+
+message OpaqueRecoveryCompleteRequest {
+  bytes peer_recovery_record = 1;
+  bytes membership_id = 2;
+}
+
+message OpaqueRecoveryCompleteResponse {
+  optional string message = 1;
+}

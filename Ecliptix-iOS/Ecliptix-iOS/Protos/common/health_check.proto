@@ -1,0 +1,25 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.common;
+option csharp_namespace = "Ecliptix.Protobuf.Common";
+option swift_prefix = "Common";
+
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+
+  ServingStatus status = 1;
+}
+
+service HealthCheck {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}

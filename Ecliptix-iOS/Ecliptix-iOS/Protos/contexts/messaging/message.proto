@@ -1,0 +1,213 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+import "contexts/messaging/conversation.proto";
+
+package ecliptix.proto.messaging;
+option csharp_namespace = "Ecliptix.Protobuf.Messaging";
+option swift_prefix = "Proto";
+
+enum DeliveryStatus {
+  DELIVERY_STATUS_UNSPECIFIED = 0;
+  DELIVERY_STATUS_SENDING = 1;
+  DELIVERY_STATUS_SENT = 2;
+  DELIVERY_STATUS_DELIVERED = 3;
+  DELIVERY_STATUS_READ = 4;
+  DELIVERY_STATUS_FAILED = 5;
+}
+
+message MessageContent {
+  oneof content {
+    TextContent text = 1;
+    MediaContent media = 2;
+    LocationContent location = 3;
+    ContactContent contact = 4;
+  }
+}
+
+message TextContent {
+  string body = 1;
+  repeated MessageMention mentions = 2;
+}
+
+message MediaContent {
+  string media_type = 1;
+  string storage_key = 2;
+  string file_name = 3;
+  string mime_type = 4;
+  uint64 size_bytes = 5;
+  optional string thumbnail_key = 6;
+  optional uint32 width = 7;
+  optional uint32 height = 8;
+  optional uint32 duration_seconds = 9;
+}
+
+message LocationContent {
+  double latitude = 1;
+  double longitude = 2;
+  optional string name = 3;
+}
+
+message ContactContent {
+  string display_name = 1;
+  string phone_number = 2;
+}
+
+message MessageMention {
+  bytes membership_id = 1;
+  uint32 offset = 2;
+  uint32 length = 3;
+}
+
+message MediaAttachment {
+  string url = 1;
+  string filename = 2;
+  string mime_type = 3;
+  int64 size_bytes = 4;
+  optional int32 width = 5;
+  optional int32 height = 6;
+  optional int32 duration_seconds = 7;
+  optional string thumbnail_url = 8;
+}
+
+message MessageReaction {
+  bytes membership_id = 1;
+  string emoji = 2;
+  google.protobuf.Timestamp reacted_at = 3;
+}
+
+message MessageEnvelope {
+  bytes message_id = 1;
+  bytes conversation_id = 2;
+  uint64 conversation_seq = 3;
+  bytes sender_id = 4;
+  MessageContent content = 5;
+  google.protobuf.Timestamp created_at = 6;
+  optional google.protobuf.Timestamp edited_at = 7;
+  optional bytes reply_to_message_id = 8;
+  bool is_tombstoned = 9;
+  bytes sender_account_id = 10;
+}
+
+message ChatMessage {
+  bytes message_id = 1;
+  bytes conversation_id = 2;
+  bytes sender_membership_id = 3;
+  string sender_display_name = 4;
+  MessageContentType content_type = 5;
+  string text_content = 6;
+  optional MediaAttachment media = 7;
+  optional bytes reply_to_message_id = 8;
+  optional bytes forwarded_from_message_id = 9;
+  DeliveryStatus delivery_status = 10;
+  google.protobuf.Timestamp sent_at = 11;
+  optional google.protobuf.Timestamp edited_at = 12;
+  bool is_deleted = 13;
+  repeated MessageReaction reactions = 14;
+  repeated MessageReadReceipt read_receipts = 15;
+  bytes sender_account_id = 16;
+  int32 view_count = 20;
+  int32 forward_count = 21;
+  bool is_silent = 22;
+  optional string author_signature = 23;
+}
+
+message MessageReadReceipt {
+  bytes membership_id = 1;
+  google.protobuf.Timestamp read_at = 2;
+}
+
+message SendMessageRequest {
+  bytes conversation_id = 1;
+  MessageContent content = 2;
+  optional bytes reply_to_message_id = 3;
+  optional bytes forwarded_from_id = 4;
+  string client_message_id = 5;
+}
+
+message SendMessageResponse {
+  bytes message_id = 1;
+  uint64 conversation_seq = 2;
+  google.protobuf.Timestamp server_timestamp = 3;
+}
+
+message EditMessageRequest {
+  bytes message_id = 1;
+  bytes conversation_id = 2;
+  MessageContent new_content = 3;
+}
+
+message EditMessageResponse {
+  google.protobuf.Timestamp edited_at = 1;
+}
+
+message DeleteMessageRequest {
+  bytes message_id = 1;
+  bytes conversation_id = 2;
+  bool delete_for_everyone = 3;
+}
+
+message DeleteMessageResponse {}
+
+message ForwardMessageRequest {
+  bytes message_id = 1;
+  bytes target_conversation_id = 2;
+}
+
+message ForwardMessageResponse {
+  ChatMessage message = 1;
+  bool is_success = 2;
+}
+
+message ListMessagesRequest {
+  bytes conversation_id = 1;
+  optional int32 page_size = 2;
+  optional bytes before_message_id = 3;
+  optional bytes after_message_id = 4;
+}
+
+message ListMessagesResponse {
+  repeated ChatMessage messages = 1;
+  bool has_more = 2;
+}
+
+message SyncMessagesRequest {
+  bytes conversation_id = 1;
+  uint64 after_seq = 2;
+  uint32 limit = 3;
+}
+
+message SyncMessagesResponse {
+  repeated MessageEnvelope messages = 1;
+  bool has_more = 2;
+}
+
+message DeliveryReceipt {
+  bytes conversation_id = 1;
+  uint64 up_to_seq = 2;
+}
+
+message ReadReceipt {
+  bytes conversation_id = 1;
+  uint64 up_to_seq = 2;
+}
+
+message MarkReadRequest {
+  bytes conversation_id = 1;
+  bytes up_to_message_id = 2;
+}
+
+message MarkReadResponse {
+  bool is_success = 1;
+}
+
+message ReactionRequest {
+  bytes message_id = 1;
+  bytes conversation_id = 2;
+  string emoji = 3;
+  bool remove = 4;
+}
+
+message ReactionResponse {}

@@ -1,0 +1,53 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+
+package ecliptix.proto.messaging;
+option csharp_namespace = "Ecliptix.Protobuf.Messaging";
+option swift_prefix = "Proto";
+
+enum PresenceStatus {
+  PRESENCE_STATUS_UNSPECIFIED = 0;
+  PRESENCE_STATUS_ONLINE = 1;
+  PRESENCE_STATUS_AWAY = 2;
+  PRESENCE_STATUS_OFFLINE = 3;
+}
+
+message UserPresence {
+  bytes membership_id = 1;
+  PresenceStatus status = 2;
+  google.protobuf.Timestamp last_seen = 3;
+}
+
+message TypingIndicator {
+  bytes conversation_id = 1;
+  bytes membership_id = 2;
+  string display_name = 3;
+  bool is_typing = 4;
+}
+
+message PresenceSubscribeRequest {
+  bytes membership_id = 1;
+  repeated bytes watch_membership_ids = 2;
+}
+
+message PresenceUpdate {
+  UserPresence presence = 1;
+}
+
+message PresenceQuery {
+  repeated bytes membership_ids = 1;
+}
+
+message PresenceResponse {
+  repeated UserPresence presences = 1;
+}
+
+message TypingIndicatorRequest {
+  bytes conversation_id = 1;
+  bool is_typing = 2;
+}
+
+message TypingIndicatorResponse {}
