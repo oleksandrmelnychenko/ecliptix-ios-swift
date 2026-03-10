@@ -126,10 +126,30 @@ final class SecureUnaryPipeline: @unchecked Sendable {
       return sessionResult.propagateErr()
     }
 
+    let requestEnvelope: EventEnvelope
+    do {
+      requestEnvelope = try await transport.requestEnvelope(
+        serviceType: serviceType,
+        rawPayload: plaintext,
+        connectId: connectId
+      )
+    } catch {
+      return .err(
+        .serializationFailed("secure request envelope: \(error.localizedDescription)"))
+    }
+
+    let requestEnvelopeData: Data
+    do {
+      requestEnvelopeData = try requestEnvelope.serializedData()
+    } catch {
+      return .err(
+        .serializationFailed("secure request envelope body: \(error.localizedDescription)"))
+    }
+
     let encryptedRequest: Data
     do {
       encryptedRequest = try session.encrypt(
-        plaintext: plaintext,
+        plaintext: requestEnvelopeData,
         envelopeType: .request,
         envelopeId: UInt32.random(in: 1...UInt32.max)
       )
@@ -148,7 +168,8 @@ final class SecureUnaryPipeline: @unchecked Sendable {
 
     let networkResult = await transport.unary(
       serviceType: serviceType,
-      payload: protoSecureRequest
+      payload: protoSecureRequest,
+      connectId: connectId
     )
     guard let response = networkResult.ok() else {
       return networkResult.propagateErr()
@@ -169,22 +190,29 @@ final class SecureUnaryPipeline: @unchecked Sendable {
       return .err(.decryptionFailed("invalid envelope: \(error.localizedDescription)"))
     }
 
-    let decryptedPayload: Data
+    let decryptedEnvelopeBytes: Data
     do {
       let decrypted = try session.decrypt(secureResponseData)
-      decryptedPayload = decrypted.plaintext
+      decryptedEnvelopeBytes = decrypted.plaintext
     } catch let error as ProtocolError {
       return .err(.decryptionFailed(error.message))
     } catch {
       return .err(.decryptionFailed(error.localizedDescription))
     }
-    if let serverError = GatewayTransportFactory.mapOutcome(response.metadata) {
+    let innerResponse: EventEnvelope
+    do {
+      innerResponse = try EventEnvelope(serializedBytes: decryptedEnvelopeBytes)
+    } catch {
+      return .err(
+        .deserializationFailed("secure response envelope body: \(error.localizedDescription)"))
+    }
+    if let serverError = GatewayTransportFactory.mapOutcome(innerResponse.metadata) {
       log.warning(
         "Secure unary: server outcome error service=\(serviceType.rawValue, privacy: .public), connectId=\(connectId, privacy: .public), outcome=\(serverError.logDescription, privacy: .public)"
       )
       return .err(serverError)
     }
-    return .ok(decryptedPayload)
+    return .ok(innerResponse.payload)
   }
 
   private func resolveSessionForSecureUnary(

@@ -20,6 +20,7 @@ message PreKeyBundle {
   bytes signed_pre_key_signature = 6;
   repeated OneTimePreKey one_time_pre_keys = 7;
   bytes kyber_public = 8;
+  bytes identity_x25519_signature = 9;
 }
 
 message HandshakeInit {

@@ -6,102 +6,142 @@ package ecliptix.transport.e2e;
 option csharp_namespace = "Ecliptix.Protobuf.Transport.E2E";
 option swift_prefix = "";
 
-enum CryptoPayloadType {
-  CRYPTO_PAYLOAD_UNSPECIFIED = 0;
-  CRYPTO_PAYLOAD_GROUP_MESSAGE = 1;
-  CRYPTO_PAYLOAD_GROUP_COMMIT = 2;
-  CRYPTO_PAYLOAD_WELCOME = 3;
-  CRYPTO_PAYLOAD_KEY_PACKAGE = 4;
-  CRYPTO_PAYLOAD_PREKEY_BUNDLE = 5;
+service E2eInternal {
+  rpc UploadKeyPackages(InternalUploadKeyPackagesRequest) returns (InternalE2EAck);
+  rpc FetchKeyPackage(InternalFetchKeyPackageRequest) returns (InternalFetchKeyPackageResponse);
+  rpc UploadPrekeyBundle(InternalUploadPrekeyBundleRequest) returns (InternalE2EAck);
+  rpc FetchPrekeyBundle(InternalFetchPrekeyBundleRequest) returns (InternalFetchPrekeyBundleResponse);
+  rpc SendGroupCommit(InternalSendGroupCommitRequest) returns (InternalE2EAck);
+  rpc SendGroupMessage(InternalSendGroupMessageRequest) returns (InternalE2EAck);
+  rpc SendWelcome(InternalSendWelcomeRequest) returns (InternalE2EAck);
+  rpc FetchPendingEvents(InternalFetchPendingEventsRequest) returns (InternalFetchPendingEventsResponse);
+  rpc AckEvents(InternalAckEventsRequest) returns (InternalE2EAck);
+  rpc StreamPendingEvents(InternalStreamPendingEventsRequest) returns (stream InternalPendingEvent);
+  rpc DeviceLinkInit(InternalDeviceLinkInitRequest) returns (InternalDeviceLinkInitResponse);
+  rpc DeviceLinkComplete(InternalDeviceLinkCompleteRequest) returns (InternalE2EAck);
 }
 
-message CryptoEnvelope {
+message InternalE2EAck {
+  bool success = 1;
+  optional string error_message = 2;
+}
+
+message InternalUploadKeyPackagesRequest {
   bytes sender_device_id = 1;
-  bytes recipient_device_id = 2;
-  CryptoPayloadType payload_type = 3;
+  repeated bytes key_packages = 2;
+  uint32 ttl_hours = 3;
+  bytes sender_account_id = 4;
+}
+
+message InternalFetchKeyPackageRequest {
+  bytes requester_device_id = 1;
+  bytes target_device_id = 2;
+}
+
+message InternalFetchKeyPackageResponse {
+  bytes key_package = 1;
+  bool found = 2;
+}
+
+message InternalUploadPrekeyBundleRequest {
+  bytes sender_device_id = 1;
+  bytes bundle = 2;
+  bytes sender_account_id = 3;
+}
+
+message InternalFetchPrekeyBundleRequest {
+  bytes requester_device_id = 1;
+  bytes target_device_id = 2;
+}
+
+message InternalFetchPrekeyBundleResponse {
+  bytes bundle = 1;
+  bool found = 2;
+}
+
+message InternalCreatorIdentity {
+  bytes identity_ed25519_public = 1;
+  bytes identity_x25519_public = 2;
+  bytes credential = 3;
+}
+
+message InternalWelcomeTarget {
+  bytes recipient_device = 1;
+  optional bytes target_key_package_hash = 2;
+}
+
+message InternalSendGroupCommitRequest {
+  bytes sender_device_id = 1;
+  bytes group_id = 2;
+  uint64 new_epoch = 3;
+  bytes commit_payload = 4;
+  bytes welcome_payload = 5;
+  repeated bytes recipient_devices = 6;
+  optional InternalCreatorIdentity creator_identity = 7;
+  optional bytes conversation_id = 8;
+  repeated InternalWelcomeTarget welcome_targets = 9;
+}
+
+message InternalSendGroupMessageRequest {
+  bytes sender_device_id = 1;
+  bytes group_id = 2;
+  uint64 epoch = 3;
   bytes encrypted_payload = 4;
-  bytes group_id = 5;
-  uint64 epoch = 6;
-  uint64 generation = 7;
-  uint32 sender_leaf_index = 8;
+  repeated bytes recipient_devices = 5;
 }
 
-message GroupCommitEnvelope {
-  bytes group_id = 1;
-  uint64 new_epoch = 2;
-  bytes commit_bytes = 3;
-  bytes welcome_bytes = 4;
-  bytes committer_device_id = 5;
+message InternalSendWelcomeRequest {
+  bytes sender_device_id = 1;
+  bytes group_id = 2;
+  bytes welcome_payload = 3;
+  repeated bytes recipient_devices = 4;
+  repeated InternalWelcomeTarget welcome_targets = 5;
 }
 
-message WelcomeEnvelope {
-  bytes group_id = 1;
-  bytes welcome_bytes = 2;
-  bytes sender_device_id = 3;
-  repeated bytes initial_key_packages = 4;
-}
-
-message PendingEvent {
-  string event_id = 1;
-  uint64 server_timestamp = 2;
-  CryptoEnvelope envelope = 3;
-}
-
-message FetchPendingEventsRequest {
+message InternalFetchPendingEventsRequest {
   bytes device_id = 1;
-  string last_event_id = 2;
+  int64 after_seq = 2;
   uint32 max_events = 3;
 }
 
-message FetchPendingEventsResponse {
-  repeated PendingEvent events = 1;
-  string next_cursor = 2;
-  bool has_more = 3;
+message InternalFetchPendingEventsResponse {
+  repeated InternalPendingEvent events = 1;
+  bool has_more = 2;
 }
 
-message KeyPackageUpload {
+message InternalPendingEvent {
+  int64 server_seq = 1;
+  string event_type = 2;
+  bytes sender_device = 3;
+  bytes group_id = 4;
+  optional uint64 epoch = 5;
+  bytes payload = 6;
+  int64 created_at_seconds = 7;
+  optional bytes conversation_id = 8;
+  optional uint32 target_leaf_index = 9;
+  optional bytes target_key_package_hash = 10;
+}
+
+message InternalAckEventsRequest {
   bytes device_id = 1;
-  repeated bytes key_packages = 2;
+  repeated int64 server_seqs = 2;
 }
 
-message KeyPackageFetchRequest {
-  bytes target_device_id = 1;
-}
-
-message KeyPackageFetchResponse {
-  bytes key_package = 1;
-}
-
-message AckEventsRequest {
+message InternalStreamPendingEventsRequest {
   bytes device_id = 1;
-  repeated string event_ids = 2;
+  int64 after_seq = 2;
 }
 
-message PreKeyBundleUpload {
-  bytes device_id = 1;
-  bytes prekey_bundle = 2;
-}
-
-message PreKeyBundleFetchRequest {
-  bytes target_device_id = 1;
-}
-
-message PreKeyBundleFetchResponse {
-  bytes prekey_bundle = 1;
-}
-
-message DeviceLinkInitRequest {
+message InternalDeviceLinkInitRequest {
   bytes primary_device_id = 1;
-  bytes provisioning_public_key = 2;
+  bytes ephemeral_public_key = 2;
+  uint32 ttl_seconds = 3;
 }
 
-message DeviceLinkCompleteRequest {
-  bytes primary_device_id = 1;
-  bytes new_device_id = 2;
-  bytes encrypted_identity = 3;
-  repeated bytes encrypted_welcomes = 4;
-}
+message InternalDeviceLinkInitResponse { string session_id = 1; }
 
-message DeviceLinkCompleteResponse {
-  bool is_success = 1;
+message InternalDeviceLinkCompleteRequest {
+  string session_id = 1;
+  bytes linking_device_id = 2;
+  bytes encrypted_payload = 3;
 }

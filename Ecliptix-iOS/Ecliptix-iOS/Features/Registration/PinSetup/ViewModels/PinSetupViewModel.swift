@@ -47,20 +47,17 @@ final class PinSetupViewModel: Resettable {
   private let pinLength: Int = 4
   private let pinOpaqueService: PinOpaqueService
   private let secureStorageService: SecureStorageService
-  private let settingsProvider: () -> ApplicationInstanceSettings?
   private let connectIdProvider: (PubKeyExchangeType) -> UInt32
   private let onPinSetupCompleted: () -> Void
 
   init(
     pinOpaqueService: PinOpaqueService,
     secureStorageService: SecureStorageService,
-    settingsProvider: @escaping () -> ApplicationInstanceSettings?,
     connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32,
     onPinSetupCompleted: @escaping () -> Void = {}
   ) {
     self.pinOpaqueService = pinOpaqueService
     self.secureStorageService = secureStorageService
-    self.settingsProvider = settingsProvider
     self.connectIdProvider = connectIdProvider
     self.onPinSetupCompleted = onPinSetupCompleted
   }
@@ -101,13 +98,6 @@ final class PinSetupViewModel: Resettable {
     isBusy = true
     defer { isBusy = false }
 
-    let settings = settingsProvider()
-    guard let accountId = settings?.currentAccountId else {
-      AppLogger.auth.error("PinSetup: missing accountId in stored settings")
-      pinError = String(localized: "Missing account information")
-      return
-    }
-
     let connectId = connectIdProvider(.dataCenterEphemeralConnect)
     var pinBytes = Data(pin.utf8)
     pin = ""
@@ -117,7 +107,6 @@ final class PinSetupViewModel: Resettable {
     defer { securePin.dispose() }
 
     let result = await pinOpaqueService.registerPin(
-      accountId: accountId,
       pinCode: securePin,
       pinLength: Int32(pinLength),
       connectId: connectId
@@ -131,8 +120,7 @@ final class PinSetupViewModel: Resettable {
       return
     }
     _ = await secureStorageService.setRegistrationCheckpoint(.pinSet)
-    AppLogger.auth.info(
-      "PinSetup: PIN set successfully for accountId=\(accountId.uuidString, privacy: .public)")
+    AppLogger.auth.info("PinSetup: PIN set successfully")
     onPinSetupCompleted()
   }
 

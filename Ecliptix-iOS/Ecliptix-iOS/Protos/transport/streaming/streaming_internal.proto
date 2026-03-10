@@ -1,0 +1,115 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.transport.streaming;
+option csharp_namespace = "Ecliptix.Protobuf.Transport.Streaming";
+option swift_prefix = "";
+
+import "contexts/streaming/stream.proto";
+
+service StreamingInternal {
+  rpc CreateStream(InternalCreateStreamRequest) returns (ecliptix.proto.streaming.CreateStreamResponse);
+  rpc StartStream(InternalStartStreamRequest) returns (ecliptix.proto.streaming.StartStreamResponse);
+  rpc EndStream(InternalEndStreamRequest) returns (ecliptix.proto.streaming.EndStreamResponse);
+  rpc GetStream(InternalGetStreamRequest) returns (ecliptix.proto.streaming.StreamInfo);
+  rpc ListLiveStreams(InternalListLiveStreamsRequest) returns (ecliptix.proto.streaming.ListLiveStreamsResponse);
+  rpc SendStreamReaction(InternalStreamReactionRequest) returns (ecliptix.proto.streaming.StreamReactionResponse);
+  rpc SendStreamChat(InternalSendStreamChatRequest) returns (ecliptix.proto.streaming.SendStreamChatResponse);
+  rpc CreateVideoUpload(InternalCreateVideoUploadRequest) returns (ecliptix.proto.streaming.CreateVideoUploadResponse);
+  rpc CompleteVideoUpload(InternalCompleteVideoUploadRequest) returns (ecliptix.proto.streaming.CompleteVideoUploadResponse);
+  rpc GetVideo(InternalGetVideoRequest) returns (ecliptix.proto.streaming.VideoInfo);
+  rpc ListVideoFeed(InternalListVideoFeedRequest) returns (ecliptix.proto.streaming.ListVideoFeedResponse);
+  rpc ReactToVideo(InternalVideoReactionRequest) returns (ecliptix.proto.streaming.VideoReactionResponse);
+  rpc CommentOnVideo(InternalVideoCommentRequest) returns (ecliptix.proto.streaming.VideoCommentResponse);
+  rpc ListVideoComments(InternalListVideoCommentsRequest) returns (ecliptix.proto.streaming.ListVideoCommentsResponse);
+  rpc IncrementView(InternalIncrementViewRequest) returns (ecliptix.proto.streaming.IncrementViewResponse);
+  rpc DeleteVideo(InternalDeleteVideoRequest) returns (InternalStreamingAck);
+}
+
+message InternalCreateStreamRequest {
+  bytes sender_membership_id = 1;
+  bytes sender_account_id = 2;
+  ecliptix.proto.streaming.CreateStreamRequest request = 3;
+}
+
+message InternalStartStreamRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.streaming.StartStreamRequest request = 2;
+}
+
+message InternalEndStreamRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.streaming.EndStreamRequest request = 2;
+}
+
+message InternalGetStreamRequest {
+  bytes membership_id = 1;
+  bytes stream_id = 2;
+}
+
+message InternalListLiveStreamsRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.streaming.ListLiveStreamsRequest request = 2;
+}
+
+message InternalStreamReactionRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.streaming.StreamReactionRequest request = 2;
+}
+
+message InternalSendStreamChatRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.streaming.SendStreamChatRequest request = 2;
+}
+
+message InternalCreateVideoUploadRequest {
+  bytes sender_membership_id = 1;
+  bytes sender_account_id = 2;
+  ecliptix.proto.streaming.CreateVideoUploadRequest request = 3;
+}
+
+message InternalCompleteVideoUploadRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.streaming.CompleteVideoUploadRequest request = 2;
+}
+
+message InternalGetVideoRequest {
+  bytes membership_id = 1;
+  bytes video_id = 2;
+}
+
+message InternalListVideoFeedRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.streaming.ListVideoFeedRequest request = 2;
+}
+
+message InternalVideoReactionRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.streaming.VideoReactionRequest request = 2;
+}
+
+message InternalVideoCommentRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.streaming.VideoCommentRequest request = 2;
+}
+
+message InternalListVideoCommentsRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.streaming.ListVideoCommentsRequest request = 2;
+}
+
+message InternalIncrementViewRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.streaming.IncrementViewRequest request = 2;
+}
+
+message InternalDeleteVideoRequest {
+  bytes sender_membership_id = 1;
+  bytes video_id = 2;
+}
+
+message InternalStreamingAck {
+  bool success = 1;
+  optional string error_message = 2;
+}

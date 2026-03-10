@@ -21,10 +21,12 @@ enum RpcError: Sendable, CustomStringConvertible {
     switch self {
     case .decryptionFailed, .sessionNotFound, .sessionRecoveryFailed:
       return true
-    case .grpcError(let code, _):
+    case .grpcError(let code, let message):
       let lower = code.lowercased()
       return lower == "unavailable" || lower == "deadline_exceeded"
         || lower == "deadlineexceeded" || lower == "cancelled"
+        || (lower == "unauthenticated"
+          && message.lowercased().contains(ServerErrorCode.Session.reinitRequired))
     case .serverError(let code, _):
       return code == ServerErrorCode.Session.reinitRequired
     case .unexpected(let msg):
@@ -38,13 +40,28 @@ enum RpcError: Sendable, CustomStringConvertible {
   }
 
   var requiresStateCleanup: Bool {
-    if case .decryptionFailed = self { return true }
-    return false
+    switch self {
+    case .decryptionFailed:
+      return true
+    case .grpcError(let code, let message):
+      return code.lowercased() == "unauthenticated"
+        && message.lowercased().contains(ServerErrorCode.Session.reinitRequired)
+    case .serverError(let code, _):
+      return code == ServerErrorCode.Session.reinitRequired
+    default:
+      return false
+    }
   }
 
   var isTransient: Bool {
     switch self {
-    case .grpcError, .sessionNotFound, .sessionRecoveryFailed:
+    case .grpcError(let code, let message):
+      let lower = code.lowercased()
+      return lower == "unavailable" || lower == "deadline_exceeded"
+        || lower == "deadlineexceeded" || lower == "cancelled"
+        || (lower == "unauthenticated"
+          && message.lowercased().contains(ServerErrorCode.Session.reinitRequired))
+    case .sessionNotFound, .sessionRecoveryFailed:
       return true
     case .decryptionFailed:
       return true

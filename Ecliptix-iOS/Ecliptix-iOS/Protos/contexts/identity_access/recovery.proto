@@ -1,0 +1,215 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+import "google/protobuf/timestamp.proto";
+
+package ecliptix.proto.membership;
+option csharp_namespace = "Ecliptix.Protobuf.Membership";
+option swift_prefix = "";
+
+enum RecoveryFactorType {
+  RECOVERY_FACTOR_UNSPECIFIED = 0;
+  RECOVERY_FACTOR_SMS_OTP = 1;
+  RECOVERY_FACTOR_RECOVERY_CODE = 2;
+  RECOVERY_FACTOR_TRUSTED_DEVICE = 3;
+}
+
+message RecoveryCodesGenerateRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+}
+
+message RecoveryCodesGenerateResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_SUCCEEDED = 1;
+    RESULT_NOT_AUTHORIZED = 2;
+    RESULT_FAILED = 3;
+  }
+
+  Result result = 1;
+  repeated string codes = 2;
+  int32 total_codes = 3;
+  optional string message = 4;
+}
+
+message RecoveryCodeVerifyRequest {
+  bytes membership_id = 1;
+  string code = 2;
+  bytes recovery_session_id = 3;
+  bytes account_id = 4;
+}
+
+message RecoveryCodeVerifyResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_SUCCEEDED = 1;
+    RESULT_INVALID = 2;
+    RESULT_EXHAUSTED = 3;
+    RESULT_RATE_LIMITED = 4;
+  }
+
+  Result result = 1;
+  int32 remaining_codes = 2;
+  optional string message = 3;
+}
+
+message RecoveryCodesStatusRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+}
+
+message RecoveryCodesStatusResponse {
+  int32 total_codes = 1;
+  int32 remaining_codes = 2;
+  bool has_recovery_codes = 3;
+  optional google.protobuf.Timestamp generated_at = 4;
+}
+
+message TrustedDeviceApprovalRequest {
+  bytes recovery_session_id = 1;
+  bytes requesting_device_id = 2;
+  string requesting_device_name = 3;
+  string requesting_device_platform = 4;
+}
+
+message TrustedDeviceApprovalResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_REQUESTED = 1;
+    RESULT_NO_TRUSTED_DEVICES = 2;
+    RESULT_FAILED = 3;
+  }
+
+  Result result = 1;
+  bytes approval_token = 2;
+  int32 trusted_device_count = 3;
+  optional string message = 4;
+}
+
+message TrustedDeviceApprovalDecisionRequest {
+  bytes approval_token = 1;
+  bytes approving_device_id = 2;
+  bool approved = 3;
+  bytes hmac_proof = 4;
+}
+
+message TrustedDeviceApprovalDecisionResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_ACCEPTED = 1;
+    RESULT_REJECTED = 2;
+    RESULT_EXPIRED = 3;
+    RESULT_INVALID = 4;
+  }
+
+  Result result = 1;
+  optional string message = 2;
+}
+
+message RecoverySessionInitRequest {
+  bytes membership_id = 1;
+  RecoveryFactorType primary_factor = 2;
+  RecoveryFactorType secondary_factor = 3;
+  bytes account_id = 4;
+}
+
+message RecoverySessionInitResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_CREATED = 1;
+    RESULT_INVALID_COMBINATION = 2;
+    RESULT_RATE_LIMITED = 3;
+    RESULT_FAILED = 4;
+  }
+
+  Result result = 1;
+  bytes recovery_session_id = 2;
+  int32 cooling_period_seconds = 3;
+  google.protobuf.Timestamp recovery_available_at = 4;
+  repeated RecoveryFactorType required_factors = 5;
+  optional string message = 6;
+}
+
+message RecoverySessionStatusRequest {
+  bytes recovery_session_id = 1;
+}
+
+message RecoverySessionStatusResponse {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_COOLING = 1;
+    STATUS_READY = 2;
+    STATUS_COMPLETED = 3;
+    STATUS_CANCELLED = 4;
+    STATUS_EXPIRED = 5;
+  }
+
+  Status status = 1;
+  int32 seconds_remaining = 2;
+  repeated RecoveryFactorVerification factor_statuses = 3;
+  optional string message = 4;
+}
+
+message RecoveryFactorVerification {
+  RecoveryFactorType factor = 1;
+  bool verified = 2;
+  optional google.protobuf.Timestamp verified_at = 3;
+}
+
+message RecoveryCancelRequest {
+  bytes recovery_session_id = 1;
+  bytes device_id = 2;
+}
+
+message RecoveryCancelResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_CANCELLED = 1;
+    RESULT_NOT_FOUND = 2;
+    RESULT_ALREADY_COMPLETED = 3;
+    RESULT_UNAUTHORIZED = 4;
+  }
+
+  Result result = 1;
+  optional string message = 2;
+}
+
+message RecoveryNotification {
+  enum NotificationType {
+    NOTIFICATION_UNSPECIFIED = 0;
+    NOTIFICATION_INITIATED = 1;
+    NOTIFICATION_FACTOR_VERIFIED = 2;
+    NOTIFICATION_COOLING_PERIOD = 3;
+    NOTIFICATION_COMPLETED = 4;
+    NOTIFICATION_CANCELLED = 5;
+    NOTIFICATION_SUSPICIOUS = 6;
+  }
+
+  NotificationType notification_type = 1;
+  bytes recovery_session_id = 2;
+  string requesting_device_name = 3;
+  string requesting_device_platform = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  optional int32 cooling_seconds_remaining = 6;
+  optional string message = 7;
+}
+
+message RecoveryActivityLogRequest {
+  bytes membership_id = 1;
+  int32 limit = 2;
+}
+
+message RecoveryActivityLogResponse {
+  repeated RecoveryActivityEntry entries = 1;
+}
+
+message RecoveryActivityEntry {
+  string event_type = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string device_name = 3;
+  string device_platform = 4;
+  bool was_successful = 5;
+  optional string message = 6;
+}

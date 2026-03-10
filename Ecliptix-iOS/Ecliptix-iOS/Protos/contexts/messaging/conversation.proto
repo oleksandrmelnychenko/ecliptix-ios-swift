@@ -105,9 +105,12 @@ message Conversation {
   int32 unread_count = 11;
   bool is_pinned = 12;
   MuteStatus mute_status = 13;
+  optional bool is_public = 14;
+  optional int32 slow_mode_seconds = 15;
+  optional bool shield_mode = 16;
+  optional bytes discussion_group_id = 17;
   bool is_broadcast = 20;
   bool admin_signatures = 21;
-  optional bytes discussion_group_id = 22;
   int32 subscriber_count = 23;
 }
 
@@ -140,7 +143,7 @@ message CreateGroupConversationRequest {
   optional string avatar_url = 4;
   repeated bytes member_membership_ids = 5;
   bytes account_id = 6;
-  bool shield_mode = 7;
+  optional bool shield_mode = 7;
 }
 
 message CreateGroupConversationResponse {
@@ -222,6 +225,102 @@ message GroupMemberRequest {
 message GroupSettingsRequest {
   bytes conversation_id = 1;
   optional string title = 2;
+  optional int32 slow_mode_seconds = 3;
+  optional int32 member_permissions = 4;
+  optional int32 disappearing_ttl_seconds = 5;
 }
 
 message ConversationActionResponse {}
+
+message CreateInviteLinkRequest {
+  bytes conversation_id = 1;
+  optional int32 max_uses = 2;
+  optional google.protobuf.Timestamp expires_at = 3;
+}
+
+message InviteLinkInfo {
+  bytes link_id = 1;
+  string token = 2;
+  bytes conversation_id = 3;
+  optional int32 max_uses = 4;
+  int32 use_count = 5;
+  optional google.protobuf.Timestamp expires_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message CreateInviteLinkResponse {
+  InviteLinkInfo link = 1;
+}
+
+message JoinByInviteRequest {
+  string token = 1;
+}
+
+message JoinByInviteResponse {
+  bytes conversation_id = 1;
+}
+
+message RevokeInviteLinkRequest {
+  bytes conversation_id = 1;
+  bytes link_id = 2;
+}
+
+message RevokeInviteLinkResponse {}
+
+message ListInviteLinksRequest {
+  bytes conversation_id = 1;
+}
+
+message ListInviteLinksResponse {
+  repeated InviteLinkInfo links = 1;
+}
+
+message BanMemberRequest {
+  bytes conversation_id = 1;
+  bytes target_membership_id = 2;
+  optional string reason = 3;
+  optional google.protobuf.Timestamp expires_at = 4;
+}
+
+message BanMemberResponse {}
+
+message UnbanMemberRequest {
+  bytes conversation_id = 1;
+  bytes target_membership_id = 2;
+}
+
+message UnbanMemberResponse {}
+
+message BanInfo {
+  bytes membership_id = 1;
+  bytes banned_by = 2;
+  optional string reason = 3;
+  google.protobuf.Timestamp banned_at = 4;
+  optional google.protobuf.Timestamp expires_at = 5;
+}
+
+message ListBansRequest {
+  bytes conversation_id = 1;
+}
+
+message ListBansResponse {
+  repeated BanInfo bans = 1;
+}
+
+message AuditLogEntry {
+  bytes actor_id = 1;
+  string action = 2;
+  optional bytes target_id = 3;
+  optional string details_json = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message ListAuditLogRequest {
+  bytes conversation_id = 1;
+  optional int32 limit = 2;
+  optional google.protobuf.Timestamp before = 3;
+}
+
+message ListAuditLogResponse {
+  repeated AuditLogEntry entries = 1;
+}

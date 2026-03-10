@@ -22,13 +22,12 @@ final class PinOpaqueService: @unchecked Sendable {
   }
 
   func registerPin(
-    accountId: UUID,
     pinCode: SecureTextBuffer,
     pinLength: Int32,
     connectId: UInt32
   ) async -> Result<Unit, PinOpaqueFailure> {
     AppLogger.auth.info(
-      "PinOpaqueRegister: start connectId=\(connectId, privacy: .public), accountId=\(accountId.uuidString, privacy: .public), pinLength=\(pinLength, privacy: .public)"
+      "PinOpaqueRegister: start connectId=\(connectId, privacy: .public), pinLength=\(pinLength, privacy: .public)"
     )
     guard pinLength >= AppConstants.PinOpaque.minPinLength,
       pinLength <= AppConstants.PinOpaque.maxPinLength
@@ -60,9 +59,9 @@ final class PinOpaqueService: @unchecked Sendable {
       defer { OpaqueNative.secureZeroData(&requestData) }
 
       var initRequest = PinRegisterInitRequest()
-      initRequest.accountID = accountId.protobufBytes
       initRequest.peerOprf = requestData
       initRequest.pinLength = pinLength
+      initRequest.scope = .account
       let initResult = await pinRpcService.pinRegisterInit(
         request: initRequest,
         connectId: connectId
@@ -89,9 +88,9 @@ final class PinOpaqueService: @unchecked Sendable {
       defer { OpaqueNative.secureZeroData(&registrationRecord) }
 
       var completeRequest = PinRegisterCompleteRequest()
-      completeRequest.accountID = accountId.protobufBytes
       completeRequest.peerRegistrationRecord = registrationRecord
       completeRequest.pinLength = pinLength
+      completeRequest.scope = .account
       let completeResult = await pinRpcService.pinRegisterComplete(
         request: completeRequest,
         connectId: connectId
@@ -170,6 +169,7 @@ final class PinOpaqueService: @unchecked Sendable {
       var initRequest = PinVerifyInitRequest()
       initRequest.accountID = accountId.protobufBytes
       initRequest.peerOprf = ke1Data
+      initRequest.scope = .account
       let initResult = await pinRpcService.pinVerifyInit(
         request: initRequest,
         connectId: connectId
@@ -199,7 +199,6 @@ final class PinOpaqueService: @unchecked Sendable {
       defer { OpaqueNative.secureZeroData(&ke3) }
 
       var finalizeRequest = PinVerifyFinalizeRequest()
-      finalizeRequest.accountID = accountId.protobufBytes
       finalizeRequest.clientMac = ke3
       finalizeRequest.clientEphemeralPublicKey = ke1Data
       finalizeRequest.serverStateToken = initResponse.serverStateToken
@@ -243,14 +242,12 @@ final class PinOpaqueService: @unchecked Sendable {
   }
 
   func changePin(
-    accountId: UUID,
     newPinCode: SecureTextBuffer,
     newPinLength: Int32,
     connectId: UInt32
   ) async -> Result<Unit, PinOpaqueFailure> {
     AppLogger.auth.info("PinOpaqueChange: start connectId=\(connectId, privacy: .public)")
     return await registerPin(
-      accountId: accountId,
       pinCode: newPinCode,
       pinLength: newPinLength,
       connectId: connectId
@@ -258,14 +255,13 @@ final class PinOpaqueService: @unchecked Sendable {
   }
 
   func disablePin(
-    accountId: UUID,
     connectId: UInt32
   ) async -> Result<PinDisableResponse, PinOpaqueFailure> {
     AppLogger.auth.info(
-      "PinOpaqueDisable: start connectId=\(connectId, privacy: .public), accountId=\(accountId.uuidString, privacy: .public)"
+      "PinOpaqueDisable: start connectId=\(connectId, privacy: .public)"
     )
     var request = PinDisableRequest()
-    request.accountID = accountId.protobufBytes
+    request.scope = .account
     let rpcResult = await pinRpcService.pinDisable(
       request: request,
       connectId: connectId

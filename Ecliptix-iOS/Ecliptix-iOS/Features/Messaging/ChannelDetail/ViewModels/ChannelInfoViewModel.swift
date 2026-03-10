@@ -13,6 +13,8 @@ final class ChannelInfoViewModel: Resettable {
   var avatarUrl: String?
   var subscriberCount: Int32 = 0
   var adminSignatures: Bool = false
+  var isPublic: Bool?
+  var slowModeSeconds: Int32?
   var admins: [MemberDisplayItem] = []
   var isAdmin: Bool = false
   var isOwner: Bool = false
@@ -55,6 +57,8 @@ final class ChannelInfoViewModel: Resettable {
       avatarUrl = conv.hasAvatarURL ? conv.avatarURL : nil
       subscriberCount = conv.subscriberCount
       adminSignatures = conv.adminSignatures
+      isPublic = conv.hasIsPublic ? conv.isPublic : nil
+      slowModeSeconds = conv.hasSlowModeSeconds ? conv.slowModeSeconds : nil
 
       let membershipBytes = settingsProvider()?.membership?.membershipId.protobufBytes
       var adminList: [MemberDisplayItem] = []
@@ -96,10 +100,9 @@ final class ChannelInfoViewModel: Resettable {
       channelId: channelId,
       title: channelTitle,
       description: channelDescription,
-      // The conversation payload does not expose canonical public/private state yet.
-      isPublic: nil,
+      isPublic: isPublic,
       adminSignatures: adminSignatures,
-      slowModeSeconds: nil,
+      slowModeSeconds: slowModeSeconds,
       connectId: connectId
     )
     switch result {
@@ -119,6 +122,8 @@ final class ChannelInfoViewModel: Resettable {
     avatarUrl = nil
     subscriberCount = 0
     adminSignatures = false
+    isPublic = nil
+    slowModeSeconds = nil
     admins = []
     isAdmin = false
     isOwner = false

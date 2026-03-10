@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Ecliptix iOS - Proto Tools Setup Script
-# Checks and installs required tools for proto generation
+# Checks and installs required tools for proto generation and validation
 
 set -e
 
@@ -52,5 +52,16 @@ else
     echo -e "${GREEN}✓ protoc-gen-grpc-swift installed${NC}"
 fi
 
+# Check and install buf
+if ! command -v buf &> /dev/null; then
+    echo -e "${YELLOW}⚠️  buf not found. Installing...${NC}"
+    brew install bufbuild/buf/buf
+    echo -e "${GREEN}✓ buf installed${NC}"
+else
+    BUF_VERSION=$(buf --version 2>/dev/null || true)
+    echo -e "${GREEN}✓ buf installed${NC}${BUF_VERSION:+ (version $BUF_VERSION)}"
+fi
+
 echo -e "\n${GREEN}🎉 All tools installed successfully!${NC}"
 echo -e "${BLUE}You can now run: ./Scripts/generate-protos.sh${NC}"
+echo -e "${BLUE}And validate drift with: ./Scripts/validate-proto-contract.py${NC}"

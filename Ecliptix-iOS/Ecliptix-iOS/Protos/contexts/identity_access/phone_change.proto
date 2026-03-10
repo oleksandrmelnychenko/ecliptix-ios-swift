@@ -1,0 +1,105 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.membership;
+option csharp_namespace = "Ecliptix.Protobuf.Membership";
+option swift_prefix = "";
+
+enum PhoneChangePath {
+  PHONE_CHANGE_PATH_UNSPECIFIED = 0;
+  PHONE_CHANGE_PATH_SMS = 1;
+  PHONE_CHANGE_PATH_RECOVERY = 2;
+}
+
+message PhoneChangeInitRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  PhoneChangePath path = 3;
+  bytes recovery_session_id = 4;
+}
+
+message PhoneChangeInitResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_CREATED = 1;
+    RESULT_PIN_REQUIRED = 2;
+    RESULT_RECOVERY_NOT_READY = 3;
+    RESULT_ALREADY_IN_PROGRESS = 4;
+    RESULT_FAILED = 5;
+  }
+
+  Result result = 1;
+  bytes change_session_id = 2;
+  bool pin_required = 3;
+  optional string message = 4;
+}
+
+message PhoneChangeVerifyOldRequest {
+  bytes change_session_id = 1;
+  string otp_code = 2;
+  string pin_code = 3;
+}
+
+message PhoneChangeVerifyOldResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_VERIFIED = 1;
+    RESULT_INVALID_OTP = 2;
+    RESULT_INVALID_PIN = 3;
+    RESULT_EXPIRED = 4;
+  }
+
+  Result result = 1;
+  optional string message = 2;
+}
+
+message PhoneChangeVerifyNewRequest {
+  bytes change_session_id = 1;
+  string new_mobile_number = 2;
+  string otp_code = 3;
+}
+
+message PhoneChangeVerifyNewResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_COMPLETED = 1;
+    RESULT_INVALID_OTP = 2;
+    RESULT_NUMBER_UNAVAILABLE = 3;
+    RESULT_NUMBER_BLOCKED = 4;
+    RESULT_INVALID_NUMBER = 5;
+    RESULT_FAILED = 6;
+  }
+
+  Result result = 1;
+  bytes new_mobile_number_id = 2;
+  optional string message = 3;
+}
+
+message PhoneChangeStatusRequest {
+  bytes change_session_id = 1;
+}
+
+message PhoneChangeStatusResponse {
+  string status = 1;
+  bool pin_verified = 2;
+  bool old_number_verified = 3;
+  bool new_number_verified = 4;
+  optional string message = 5;
+}
+
+message PhoneChangeCancelRequest {
+  bytes change_session_id = 1;
+}
+
+message PhoneChangeCancelResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_CANCELLED = 1;
+    RESULT_NOT_FOUND = 2;
+    RESULT_ALREADY_COMPLETED = 3;
+  }
+
+  Result result = 1;
+  optional string message = 2;
+}

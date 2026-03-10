@@ -47,6 +47,7 @@ actor SyncManager {
     category: "SyncManager"
   )
   private static let catchUpBatchSize: UInt32 = 100
+  private static let keyPackageTTLHours: UInt32 = 168
   private static let outboxFlushInterval: TimeInterval = 5.0
 
   init(
@@ -108,34 +109,32 @@ actor SyncManager {
     Self.log.info("Starting catch-up sync")
 
     do {
-      let lastEventId = try database.getSyncState(key: SyncStateRecord.Keys.lastEventId) ?? ""
-      var cursor = lastEventId
+      var cursor = try lastProcessedServerSeq()
       var totalProcessed = 0
 
       while true {
-        let batch = try await fetchPendingEvents(
-          afterEventId: cursor, maxEvents: Self.catchUpBatchSize)
+        let batch = try await fetchPendingEvents(afterServerSeq: cursor, maxEvents: Self.catchUpBatchSize)
         if batch.events.isEmpty {
           break
         }
 
-        var processedEventIDs: [String] = []
+        var processedEventSeqs: [Int64] = []
 
         for event in batch.events {
           try await processIncomingEvent(event)
-          processedEventIDs.append(event.eventID)
+          processedEventSeqs.append(event.serverSeq)
           totalProcessed += 1
         }
 
         if let lastEvent = batch.events.last {
           try database.setSyncState(
             key: SyncStateRecord.Keys.lastEventId,
-            value: lastEvent.eventID
+            value: String(lastEvent.serverSeq)
           )
+          cursor = lastEvent.serverSeq
         }
 
-        cursor = batch.nextCursor
-        await acknowledgeProcessedEventsIfNeeded(processedEventIDs)
+        await acknowledgeProcessedEventsIfNeeded(processedEventSeqs)
         if !batch.hasMore_p {
           break
         }
@@ -155,12 +154,12 @@ actor SyncManager {
   }
 
   private func fetchPendingEvents(
-    afterEventId: String,
+    afterServerSeq: Int64,
     maxEvents: UInt32
-  ) async throws -> FetchPendingEventsResponse {
-    var request = FetchPendingEventsRequest()
+  ) async throws -> InternalFetchPendingEventsResponse {
+    var request = InternalFetchPendingEventsRequest()
     request.deviceID = deviceId
-    request.lastEventID = afterEventId
+    request.afterSeq = afterServerSeq
     request.maxEvents = maxEvents
 
     let result = await transport.unary(
@@ -171,7 +170,7 @@ actor SyncManager {
 
     switch result {
     case .ok(let envelope):
-      return try FetchPendingEventsResponse(serializedBytes: envelope.payload)
+      return try InternalFetchPendingEventsResponse(serializedBytes: envelope.payload)
     case .err(let error):
       throw Failure.transportError("fetchPendingEvents: \(error)")
     }
@@ -186,14 +185,13 @@ actor SyncManager {
   }
 
   private func runEventStream() async {
-    let lastEventId = (try? database.getSyncState(key: SyncStateRecord.Keys.lastEventId)) ?? ""
+    let lastServerSeq = (try? lastProcessedServerSeq()) ?? 0
     state = .streaming
-    Self.log.info("Event stream started, lastEventId=\(lastEventId, privacy: .public)")
+    Self.log.info("Event stream started, lastServerSeq=\(lastServerSeq, privacy: .public)")
 
-    var streamRequest = FetchPendingEventsRequest()
+    var streamRequest = InternalStreamPendingEventsRequest()
     streamRequest.deviceID = deviceId
-    streamRequest.lastEventID = lastEventId
-    streamRequest.maxEvents = 0
+    streamRequest.afterSeq = lastServerSeq
 
     let result = await transport.serverStream(
       serviceType: .e2ePendingEventsStream,
@@ -202,13 +200,13 @@ actor SyncManager {
     ) { [weak self] envelope in
       guard let self else { return }
       do {
-        let event = try PendingEvent(serializedBytes: envelope.payload)
+        let event = try InternalPendingEvent(serializedBytes: envelope.payload)
         try await self.processIncomingEvent(event)
         try self.database.setSyncState(
           key: SyncStateRecord.Keys.lastEventId,
-          value: event.eventID
+          value: String(event.serverSeq)
         )
-        await self.acknowledgeProcessedEventsIfNeeded([event.eventID])
+        await self.acknowledgeProcessedEventsIfNeeded([event.serverSeq])
       } catch {
         await self.handleStreamProcessingFailure(error)
       }
@@ -252,50 +250,24 @@ actor SyncManager {
     return false
   }
 
-  private func processIncomingEvent(_ event: PendingEvent) async throws {
-    guard event.hasEnvelope else {
-      throw Failure.invalidState("Pending event \(event.eventID) missing envelope")
-    }
-
-    let envelope = event.envelope
-    let payloadType = envelope.payloadType
-
-    switch payloadType {
-    case .cryptoPayloadGroupMessage:
+  private func processIncomingEvent(_ event: InternalPendingEvent) async throws {
+    switch event.eventType {
+    case "group_message":
       try await messageProcessor.processGroupMessage(
-        groupId: envelope.groupID,
-        ciphertext: envelope.encryptedPayload,
-        senderDeviceId: envelope.senderDeviceID
+        groupId: event.groupID,
+        ciphertext: event.payload,
+        senderDeviceId: event.senderDevice
       )
-    case .cryptoPayloadGroupCommit:
+    case "group_commit":
       try await messageProcessor.processGroupCommit(
-        groupId: envelope.groupID,
-        commitBytes: envelope.encryptedPayload
+        groupId: event.groupID,
+        commitBytes: event.payload
       )
-    case .cryptoPayloadWelcome:
-      let candidates = await cryptoState.consumeAllKeyPackageSecretEntries()
-      guard !candidates.isEmpty else {
-        Self.log.error(
-          "No key package secrets available to process Welcome from \(envelope.senderDeviceID.hexString, privacy: .public)"
-        )
-        throw Failure.cryptoError("No key package secrets available for Welcome processing")
-      }
-      try await processWelcome(
-        welcomeBytes: envelope.encryptedPayload,
-        senderDeviceId: envelope.senderDeviceID,
-        candidates: candidates
-      )
-    case .cryptoPayloadKeyPackage:
-      throw Failure.invalidState(
-        "Unsupported pending event payload type \(payloadType.rawValue) for event \(event.eventID)"
-      )
-    case .cryptoPayloadPrekeyBundle:
-      throw Failure.invalidState(
-        "Unsupported pending event payload type \(payloadType.rawValue) for event \(event.eventID)"
-      )
+    case "welcome":
+      try await processWelcome(event)
     default:
       throw Failure.invalidState(
-        "Unknown pending event payload type \(payloadType.rawValue) for event \(event.eventID)")
+        "Unknown pending event type \(event.eventType) for seq \(event.serverSeq)")
     }
   }
 
@@ -319,17 +291,45 @@ actor SyncManager {
   }
 
   private func processWelcome(
-    welcomeBytes: Data,
-    senderDeviceId: Data,
-    candidates: [(hash: Data, secrets: ManagedKeyPackageSecrets)]
+    _ event: InternalPendingEvent
   ) async throws {
+    let conversationId = event.hasConversationID ? event.conversationID : nil
+
+    if event.hasTargetKeyPackageHash {
+      guard let secrets = await cryptoState.consumeKeyPackageSecrets(
+        keyPackageHash: event.targetKeyPackageHash
+      ) else {
+        Self.log.error(
+          "No key package secrets available for targeted Welcome hash=\(event.targetKeyPackageHash.hexString, privacy: .public)"
+        )
+        throw Failure.cryptoError("No matching key package secrets available for Welcome processing")
+      }
+      try await messageProcessor.processWelcome(
+        welcomeBytes: event.payload,
+        senderDeviceId: event.senderDevice,
+        identity: identity,
+        secrets: secrets,
+        conversationId: conversationId
+      )
+      return
+    }
+
+    let candidates = await cryptoState.consumeAllKeyPackageSecretEntries()
+    guard !candidates.isEmpty else {
+      Self.log.error(
+        "No key package secrets available to process Welcome from \(event.senderDevice.hexString, privacy: .public)"
+      )
+      throw Failure.cryptoError("No key package secrets available for Welcome processing")
+    }
+
     for (index, entry) in candidates.enumerated() {
       do {
         try await messageProcessor.processWelcome(
-          welcomeBytes: welcomeBytes,
-          senderDeviceId: senderDeviceId,
+          welcomeBytes: event.payload,
+          senderDeviceId: event.senderDevice,
           identity: identity,
-          secrets: entry.secrets
+          secrets: entry.secrets,
+          conversationId: conversationId
         )
         let unused = Array(candidates.dropFirst(index + 1))
         await cryptoState.restoreKeyPackageSecrets(unused)
@@ -363,17 +363,15 @@ actor SyncManager {
     )
 
     let info = try await cryptoState.sessionInfo(conversationId: conversationId)
-    _ = try database.fetchConversation(id: conversationId)
+    let recipientDevices = try recipientDevices(for: conversationId)
 
-    var envelope = CryptoEnvelope()
-    envelope.senderDeviceID = deviceId
-    envelope.payloadType = .cryptoPayloadGroupMessage
-    envelope.encryptedPayload = encryptResult.ciphertext
-    envelope.groupID = info.groupId
-    envelope.epoch = info.epoch
-    envelope.senderLeafIndex = info.myLeafIndex
+    var request = InternalSendGroupMessageRequest()
+    request.groupID = info.groupId
+    request.epoch = info.epoch
+    request.encryptedPayload = encryptResult.ciphertext
+    request.recipientDevices = recipientDevices
 
-    let envelopeBytes = try envelope.serializedData()
+    let envelopeBytes = try request.serializedData()
     let outboxEntry = OutboxRecord(
       conversationId: conversationId,
       payloadType: OutboxRecord.PayloadType.groupMessage.rawValue,
@@ -386,19 +384,40 @@ actor SyncManager {
     await outboxManager.flushPending()
   }
 
-  func sendGroupCommit(conversationId: Data, commitBytes: Data, welcomeBytes: Data?) async throws {
+  func sendGroupCommit(
+    conversationId: Data,
+    commitBytes: Data,
+    welcomeBytes: Data?,
+    welcomeTargets: [InternalWelcomeTarget] = [],
+    additionalRecipientDevices: [Data] = []
+  ) async throws {
     let info = try await cryptoState.sessionInfo(conversationId: conversationId)
+    let recipientDevices = try recipientDevices(
+      for: conversationId,
+      additionalDevices: additionalRecipientDevices
+    )
 
-    var commitEnvelope = GroupCommitEnvelope()
-    commitEnvelope.groupID = info.groupId
-    commitEnvelope.newEpoch = info.epoch
-    commitEnvelope.commitBytes = commitBytes
-    commitEnvelope.committerDeviceID = deviceId
+    var request = InternalSendGroupCommitRequest()
+    request.groupID = info.groupId
+    request.newEpoch = info.epoch
+    request.commitPayload = commitBytes
+    request.recipientDevices = recipientDevices
     if let welcome = welcomeBytes {
-      commitEnvelope.welcomeBytes = welcome
+      request.welcomePayload = welcome
+    }
+    if info.epoch == 1 {
+      var creatorIdentity = InternalCreatorIdentity()
+      creatorIdentity.identityEd25519Public = try CryptoEngine.getIdentityEd25519Public(identity)
+      creatorIdentity.identityX25519Public = try CryptoEngine.getIdentityX25519Public(identity)
+      creatorIdentity.credential = deviceId
+      request.creatorIdentity = creatorIdentity
+      request.conversationID = conversationId
+    }
+    if !welcomeTargets.isEmpty {
+      request.welcomeTargets = welcomeTargets
     }
 
-    let envelopeBytes = try commitEnvelope.serializedData()
+    let envelopeBytes = try request.serializedData()
     let outboxEntry = OutboxRecord(
       conversationId: conversationId,
       payloadType: OutboxRecord.PayloadType.groupCommit.rawValue,
@@ -411,15 +430,30 @@ actor SyncManager {
     await outboxManager.flushPending()
   }
 
-  func addMemberToConversation(conversationId: Data, keyPackageBytes: Data) async throws {
+  func addMemberToConversation(
+    conversationId: Data,
+    keyPackageBytes: Data,
+    targetDeviceId: Data? = nil
+  ) async throws {
     let result = try await cryptoState.addMemberAndPersist(
       conversationId: conversationId,
       keyPackageBytes: keyPackageBytes
     )
+    var welcomeTargets: [InternalWelcomeTarget] = []
+    var additionalRecipientDevices: [Data] = []
+    if let targetDeviceId {
+      var target = InternalWelcomeTarget()
+      target.recipientDevice = targetDeviceId
+      target.targetKeyPackageHash = Data(SHA256.hash(data: keyPackageBytes))
+      welcomeTargets = [target]
+      additionalRecipientDevices = [targetDeviceId]
+    }
     try await sendGroupCommit(
       conversationId: conversationId,
       commitBytes: result.commitBytes,
-      welcomeBytes: result.welcomeBytes
+      welcomeBytes: result.welcomeBytes,
+      welcomeTargets: welcomeTargets,
+      additionalRecipientDevices: additionalRecipientDevices
     )
     Self.log.info("Added member to conversation \(conversationId.hexString, privacy: .public)")
   }
@@ -455,9 +489,10 @@ actor SyncManager {
       secretsByHash.append((hash: hash, secrets: secrets))
     }
 
-    var upload = KeyPackageUpload()
-    upload.deviceID = deviceId
+    var upload = InternalUploadKeyPackagesRequest()
     upload.keyPackages = packages
+    upload.ttlHours = Self.keyPackageTTLHours
+    upload.senderAccountID = accountId
 
     let result = await transport.unary(
       serviceType: .e2eUploadKeyPackages,
@@ -483,7 +518,7 @@ actor SyncManager {
   }
 
   func fetchKeyPackage(targetDeviceId: Data) async throws -> Data {
-    var request = KeyPackageFetchRequest()
+    var request = InternalFetchKeyPackageRequest()
     request.targetDeviceID = targetDeviceId
 
     let result = await transport.unary(
@@ -494,19 +529,22 @@ actor SyncManager {
 
     switch result {
     case .ok(let envelope):
-      let response = try KeyPackageFetchResponse(serializedBytes: envelope.payload)
+      let response = try InternalFetchKeyPackageResponse(serializedBytes: envelope.payload)
+      guard response.found else {
+        throw Failure.transportError("fetchKeyPackage: no key package available")
+      }
       return response.keyPackage
     case .err(let error):
       throw Failure.transportError("fetchKeyPackage: \(error)")
     }
   }
 
-  func acknowledgeEvents(_ eventIds: [String]) async throws {
-    guard !eventIds.isEmpty else { return }
+  func acknowledgeEvents(_ serverSeqs: [Int64]) async throws {
+    guard !serverSeqs.isEmpty else { return }
 
-    var ack = AckEventsRequest()
+    var ack = InternalAckEventsRequest()
     ack.deviceID = deviceId
-    ack.eventIds = eventIds
+    ack.serverSeqs = serverSeqs
 
     let result = await transport.unary(
       serviceType: .e2eAckEvents,
@@ -519,14 +557,41 @@ actor SyncManager {
     }
   }
 
-  private func acknowledgeProcessedEventsIfNeeded(_ eventIds: [String]) async {
-    guard !eventIds.isEmpty else { return }
+  private func acknowledgeProcessedEventsIfNeeded(_ serverSeqs: [Int64]) async {
+    guard !serverSeqs.isEmpty else { return }
     do {
-      try await acknowledgeEvents(eventIds)
+      try await acknowledgeEvents(serverSeqs)
     } catch {
       Self.log.warning(
-        "Failed to acknowledge \(eventIds.count) E2E events: \(error.localizedDescription, privacy: .public)"
+        "Failed to acknowledge \(serverSeqs.count) E2E events: \(error.localizedDescription, privacy: .public)"
       )
     }
+  }
+
+  private func lastProcessedServerSeq() throws -> Int64 {
+    guard
+      let rawValue = try database.getSyncState(key: SyncStateRecord.Keys.lastEventId),
+      !rawValue.isEmpty
+    else {
+      return 0
+    }
+    return Int64(rawValue) ?? 0
+  }
+
+  private func recipientDevices(
+    for conversationId: Data,
+    additionalDevices: [Data] = []
+  ) throws -> [Data] {
+    let storedMembers = try database.fetchMembers(conversationId: conversationId)
+      .map(\.deviceId)
+      .filter { !$0.isEmpty && $0 != deviceId }
+    let merged = storedMembers + additionalDevices.filter { !$0.isEmpty && $0 != deviceId }
+    let uniqueDevices = Array(Set(merged)).sorted { $0.lexicographicallyPrecedes($1) }
+    guard !uniqueDevices.isEmpty else {
+      throw Failure.invalidState(
+        "No recipient devices known for conversation \(conversationId.hexString)"
+      )
+    }
+    return uniqueDevices
   }
 }

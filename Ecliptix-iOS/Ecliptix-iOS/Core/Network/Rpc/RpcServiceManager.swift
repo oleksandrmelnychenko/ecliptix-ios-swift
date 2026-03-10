@@ -104,6 +104,7 @@ final class RpcServiceManager: @unchecked Sendable {
   func unary(
     serviceType: RpcServiceType,
     payload: ProtoSecureEnvelope,
+    connectId: UInt32? = nil,
     exchangeType: PubKeyExchangeType = .dataCenterEphemeralConnect
   ) async -> Result<EventEnvelope, RpcError> {
     let gateway: EventGatewayTransport? = lock.withLock { transport }
@@ -113,6 +114,7 @@ final class RpcServiceManager: @unchecked Sendable {
     return await gateway.unary(
       serviceType: serviceType,
       payload: payload,
+      connectId: connectId,
       exchangeType: exchangeType
     )
   }
@@ -120,6 +122,7 @@ final class RpcServiceManager: @unchecked Sendable {
   func serverStream(
     serviceType: RpcServiceType,
     payload: ProtoSecureEnvelope,
+    connectId: UInt32? = nil,
     exchangeType: PubKeyExchangeType = .dataCenterEphemeralConnect,
     onMessage: @escaping (EventEnvelope) async -> Void
   ) async -> Result<Unit, RpcError> {
@@ -130,9 +133,33 @@ final class RpcServiceManager: @unchecked Sendable {
     return await gateway.serverStream(
       serviceType: serviceType,
       payload: payload,
+      connectId: connectId,
       exchangeType: exchangeType,
       onMessage: onMessage
     )
+  }
+
+  func requestEnvelope(
+    serviceType: RpcServiceType,
+    rawPayload: Data,
+    connectId: UInt32? = nil,
+    exchangeType: PubKeyExchangeType = .dataCenterEphemeralConnect
+  ) async -> Result<EventEnvelope, RpcError> {
+    let gateway: EventGatewayTransport? = lock.withLock { transport }
+    guard let gateway else {
+      return .err(.unexpected("RpcServiceManager not configured"))
+    }
+    do {
+      return .ok(
+        try await gateway.requestEnvelope(
+          serviceType: serviceType,
+          rawPayload: rawPayload,
+          connectId: connectId,
+          exchangeType: exchangeType
+        ))
+    } catch {
+      return .err(.serializationFailed("request envelope: \(error.localizedDescription)"))
+    }
   }
 
   var isConfigured: Bool {

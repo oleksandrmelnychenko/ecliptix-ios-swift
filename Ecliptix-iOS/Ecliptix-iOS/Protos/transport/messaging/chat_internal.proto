@@ -1,0 +1,283 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.transport.messaging;
+option csharp_namespace = "Ecliptix.Protobuf.Transport.Messaging";
+option swift_prefix = "";
+
+import "contexts/messaging/message.proto";
+import "contexts/messaging/conversation.proto";
+import "contexts/messaging/presence.proto";
+import "contexts/messaging/contact.proto";
+
+service ChatInternal {
+  rpc SendMessage(InternalSendRequest) returns (ecliptix.proto.messaging.SendMessageResponse);
+  rpc EditMessage(InternalEditRequest) returns (ecliptix.proto.messaging.EditMessageResponse);
+  rpc DeleteMessage(InternalDeleteRequest) returns (ecliptix.proto.messaging.DeleteMessageResponse);
+  rpc SyncMessages(InternalSyncRequest) returns (ecliptix.proto.messaging.SyncMessagesResponse);
+  rpc CreateConversation(InternalCreateConversationRequest) returns (ecliptix.proto.messaging.CreateConversationResponse);
+  rpc ListConversations(InternalListConversationsRequest) returns (ecliptix.proto.messaging.ListConversationsResponse);
+  rpc GetConversation(InternalGetConversationRequest) returns (ecliptix.proto.messaging.GetConversationResponse);
+  rpc MuteConversation(InternalMuteRequest) returns (ecliptix.proto.messaging.ConversationActionResponse);
+  rpc ArchiveConversation(InternalArchiveRequest) returns (ecliptix.proto.messaging.ConversationActionResponse);
+  rpc PinConversation(InternalPinRequest) returns (ecliptix.proto.messaging.PinConversationResponse);
+  rpc DeleteConversation(InternalDeleteConversationRequest) returns (ecliptix.proto.messaging.DeleteConversationResponse);
+  rpc AddGroupMember(InternalGroupMemberRequest) returns (InternalAck);
+  rpc RemoveGroupMember(InternalGroupMemberRequest) returns (InternalAck);
+  rpc UpdateGroupRole(InternalGroupMemberRequest) returns (InternalAck);
+  rpc UpdateGroupSettings(InternalGroupSettingsRequest) returns (InternalAck);
+  rpc LeaveGroup(InternalLeaveGroupRequest) returns (InternalAck);
+  rpc FetchMessage(InternalFetchMessageRequest) returns (ecliptix.proto.messaging.MessageEnvelope);
+  rpc FetchPendingMessages(InternalFetchPendingRequest) returns (stream ecliptix.proto.messaging.MessageEnvelope);
+  rpc AckDelivery(InternalDeliveryAck) returns (InternalAck);
+  rpc UpdateDeliveryReceipt(InternalReceiptUpdate) returns (InternalAck);
+  rpc UpdateReadReceipt(InternalReceiptUpdate) returns (InternalAck);
+  rpc ReactToMessage(InternalReactionRequest) returns (ecliptix.proto.messaging.ReactionResponse);
+  rpc SendTypingIndicator(InternalTypingRequest) returns (ecliptix.proto.messaging.TypingIndicatorResponse);
+  rpc ForwardMessage(InternalForwardRequest) returns (ecliptix.proto.messaging.ForwardMessageResponse);
+  rpc BlockContact(ecliptix.proto.messaging.BlockContactRequest) returns (ecliptix.proto.messaging.BlockContactResponse);
+  rpc UnblockContact(ecliptix.proto.messaging.UnblockContactRequest) returns (ecliptix.proto.messaging.UnblockContactResponse);
+  rpc PinMessage(InternalPinMessageRequest) returns (ecliptix.proto.messaging.PinMessageResponse);
+  rpc UnpinMessage(InternalUnpinMessageRequest) returns (ecliptix.proto.messaging.UnpinMessageResponse);
+  rpc ListPinnedMessages(InternalListPinnedMessagesRequest) returns (ecliptix.proto.messaging.ListPinnedMessagesResponse);
+  rpc CreateInviteLink(InternalCreateInviteLinkRequest) returns (ecliptix.proto.messaging.CreateInviteLinkResponse);
+  rpc JoinByInvite(InternalJoinByInviteRequest) returns (ecliptix.proto.messaging.JoinByInviteResponse);
+  rpc RevokeInviteLink(InternalRevokeInviteLinkRequest) returns (ecliptix.proto.messaging.RevokeInviteLinkResponse);
+  rpc ListInviteLinks(InternalListInviteLinksRequest) returns (ecliptix.proto.messaging.ListInviteLinksResponse);
+  rpc BanMember(InternalBanMemberRequest) returns (ecliptix.proto.messaging.BanMemberResponse);
+  rpc UnbanMember(InternalUnbanMemberRequest) returns (ecliptix.proto.messaging.UnbanMemberResponse);
+  rpc ListBans(InternalListBansRequest) returns (ecliptix.proto.messaging.ListBansResponse);
+  rpc ListAuditLog(InternalListAuditLogRequest) returns (ecliptix.proto.messaging.ListAuditLogResponse);
+  rpc ListThreadReplies(InternalListThreadRepliesRequest) returns (ecliptix.proto.messaging.ListThreadRepliesResponse);
+  rpc GetUnreadMentions(InternalGetUnreadMentionsRequest) returns (ecliptix.proto.messaging.GetUnreadMentionsResponse);
+  rpc TransferOwnership(InternalTransferOwnershipRequest) returns (InternalAck);
+  rpc UpdateConversation(InternalUpdateConversationRequest) returns (ecliptix.proto.messaging.UpdateConversationResponse);
+}
+
+message InternalSendRequest {
+  bytes sender_membership_id = 1;
+  bytes sender_account_id = 2;
+  ecliptix.proto.messaging.SendMessageRequest request = 3;
+  bytes sender_device_id = 4;
+}
+
+message InternalEditRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.messaging.EditMessageRequest request = 2;
+  bytes sender_account_id = 3;
+}
+
+message InternalDeleteRequest {
+  bytes sender_membership_id = 1;
+  ecliptix.proto.messaging.DeleteMessageRequest request = 2;
+  bytes sender_account_id = 3;
+}
+
+message InternalSyncRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.SyncMessagesRequest request = 2;
+  bytes account_id = 3;
+}
+
+message InternalCreateConversationRequest {
+  bytes creator_membership_id = 1;
+  ecliptix.proto.messaging.CreateConversationRequest request = 2;
+  bytes creator_account_id = 3;
+  repeated bytes participant_account_ids = 4;
+}
+
+message InternalListConversationsRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.ListConversationsRequest request = 2;
+  bytes account_id = 3;
+}
+
+message InternalGetConversationRequest {
+  bytes membership_id = 1;
+  bytes conversation_id = 2;
+  bytes account_id = 3;
+}
+
+message InternalMuteRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.MuteConversationRequest request = 2;
+  bytes account_id = 3;
+}
+
+message InternalArchiveRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.ArchiveConversationRequest request = 2;
+  bytes account_id = 3;
+}
+
+message InternalGroupMemberRequest {
+  bytes requester_membership_id = 1;
+  ecliptix.proto.messaging.GroupMemberRequest request = 2;
+  bytes requester_account_id = 3;
+}
+
+message InternalGroupSettingsRequest {
+  bytes requester_membership_id = 1;
+  ecliptix.proto.messaging.GroupSettingsRequest request = 2;
+  bytes requester_account_id = 3;
+}
+
+message InternalLeaveGroupRequest {
+  bytes membership_id = 1;
+  bytes conversation_id = 2;
+  bytes account_id = 3;
+}
+
+message InternalFetchMessageRequest {
+  bytes membership_id = 1;
+  bytes message_id = 2;
+  bytes conversation_id = 3;
+  bytes account_id = 4;
+}
+
+message InternalFetchPendingRequest {
+  bytes membership_id = 1;
+  uint32 max_messages = 2;
+  bytes account_id = 3;
+}
+
+message InternalDeliveryAck {
+  bytes membership_id = 1;
+  repeated bytes message_ids = 2;
+  bytes account_id = 3;
+}
+
+message InternalReceiptUpdate {
+  bytes membership_id = 1;
+  bytes conversation_id = 2;
+  uint64 up_to_seq = 3;
+  bytes account_id = 4;
+}
+
+message InternalAck {
+  bool success = 1;
+  optional string error_message = 2;
+}
+
+message InternalPinRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.PinConversationRequest request = 2;
+  bytes account_id = 3;
+}
+
+message InternalDeleteConversationRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.DeleteConversationRequest request = 2;
+  bytes account_id = 3;
+}
+
+message InternalReactionRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.ReactionRequest request = 3;
+}
+
+message InternalTypingRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.TypingIndicatorRequest request = 2;
+  bytes account_id = 3;
+}
+
+message InternalForwardRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.ForwardMessageRequest request = 3;
+  bytes sender_device_id = 4;
+}
+
+message InternalPinMessageRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.PinMessageRequest request = 3;
+}
+
+message InternalUnpinMessageRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.UnpinMessageRequest request = 3;
+}
+
+message InternalListPinnedMessagesRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.ListPinnedMessagesRequest request = 3;
+}
+
+message InternalCreateInviteLinkRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.CreateInviteLinkRequest request = 3;
+}
+
+message InternalJoinByInviteRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.JoinByInviteRequest request = 3;
+}
+
+message InternalRevokeInviteLinkRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.RevokeInviteLinkRequest request = 3;
+}
+
+message InternalListInviteLinksRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.ListInviteLinksRequest request = 3;
+}
+
+message InternalBanMemberRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.BanMemberRequest request = 3;
+}
+
+message InternalUnbanMemberRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.UnbanMemberRequest request = 3;
+}
+
+message InternalListBansRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.ListBansRequest request = 3;
+}
+
+message InternalListAuditLogRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.ListAuditLogRequest request = 3;
+}
+
+message InternalListThreadRepliesRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.ListThreadRepliesRequest request = 3;
+}
+
+message InternalGetUnreadMentionsRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.GetUnreadMentionsRequest request = 3;
+}
+
+message InternalTransferOwnershipRequest {
+  bytes requester_membership_id = 1;
+  bytes requester_account_id = 2;
+  bytes conversation_id = 3;
+  bytes new_owner_membership_id = 4;
+}
+
+message InternalUpdateConversationRequest {
+  bytes membership_id = 1;
+  bytes account_id = 2;
+  ecliptix.proto.messaging.UpdateConversationRequest request = 3;
+}

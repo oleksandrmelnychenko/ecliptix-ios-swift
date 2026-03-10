@@ -102,7 +102,6 @@ extension AppDependencies {
     PinSetupViewModel(
       pinOpaqueService: pinOpaqueService,
       secureStorageService: secureStorageService,
-      settingsProvider: weakSettingsProvider(),
       connectIdProvider: weakConnectIdProvider(),
       onPinSetupCompleted: onPinSetupCompleted
     )

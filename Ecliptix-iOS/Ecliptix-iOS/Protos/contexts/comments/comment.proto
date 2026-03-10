@@ -1,0 +1,109 @@
+syntax = "proto3";
+// Copyright (c) 2026 Oleksandr Melnychenko. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package ecliptix.proto.comments;
+option csharp_namespace = "Ecliptix.Protobuf.Comments";
+option swift_prefix = "Proto";
+
+import "google/protobuf/timestamp.proto";
+
+enum CommentSortOrder {
+  COMMENT_SORT_ORDER_UNSPECIFIED = 0;
+  COMMENT_SORT_ORDER_NEWEST = 1;
+  COMMENT_SORT_ORDER_OLDEST = 2;
+  COMMENT_SORT_ORDER_POPULAR = 3;
+}
+
+message CommentAuthor {
+  bytes membership_id = 1;
+  bytes account_id = 6;
+  string display_name = 2;
+  string profile_name = 3;
+  optional string avatar_url = 4;
+  bool is_verified = 5;
+}
+
+message Comment {
+  bytes comment_id = 1;
+  bytes post_id = 2;
+  CommentAuthor author = 3;
+  string text = 4;
+  optional bytes reply_to_id = 5;
+  optional bytes parent_id = 6;
+  uint64 like_count = 7;
+  uint64 reply_count = 8;
+  bool is_edited = 9;
+  bool is_deleted = 10;
+  bool is_liked_by_me = 11;
+  google.protobuf.Timestamp created_at = 12;
+  optional google.protobuf.Timestamp edited_at = 13;
+}
+
+message CreateCommentRequest {
+  bytes post_id = 1;
+  string text = 2;
+  optional bytes reply_to_id = 3;
+}
+
+message CreateCommentResponse {
+  bytes comment_id = 1;
+  google.protobuf.Timestamp created_at = 2;
+}
+
+message EditCommentRequest {
+  bytes comment_id = 1;
+  string new_text = 2;
+}
+
+message EditCommentResponse {
+  google.protobuf.Timestamp edited_at = 1;
+}
+
+message DeleteCommentRequest {
+  bytes comment_id = 1;
+}
+
+message DeleteCommentResponse {}
+
+message LikeCommentRequest {
+  bytes comment_id = 1;
+  bool remove = 2;
+}
+
+message LikeCommentResponse {
+  uint64 like_count = 1;
+}
+
+message GetCommentsRequest {
+  bytes post_id = 1;
+  uint32 limit = 2;
+  optional bytes cursor = 3;
+  CommentSortOrder sort = 4;
+}
+
+message GetCommentsResponse {
+  repeated Comment comments = 1;
+  optional bytes next_cursor = 2;
+  uint64 total_count = 3;
+}
+
+message GetCommentThreadRequest {
+  bytes parent_comment_id = 1;
+  uint32 limit = 2;
+  optional bytes cursor = 3;
+}
+
+message GetCommentThreadResponse {
+  Comment parent = 1;
+  repeated Comment replies = 2;
+  optional bytes next_cursor = 3;
+}
+
+message GetCommentCountRequest {
+  bytes post_id = 1;
+}
+
+message GetCommentCountResponse {
+  uint64 count = 1;
+}

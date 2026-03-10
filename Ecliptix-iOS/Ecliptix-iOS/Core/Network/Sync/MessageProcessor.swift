@@ -103,7 +103,8 @@ actor MessageProcessor {
     welcomeBytes: Data,
     senderDeviceId: Data,
     identity: ManagedIdentityHandle,
-    secrets: ManagedKeyPackageSecrets
+    secrets: ManagedKeyPackageSecrets,
+    conversationId: Data?
   ) async throws {
     let session: ManagedGroupSession
     do {
@@ -121,10 +122,16 @@ actor MessageProcessor {
     let info = try CryptoEngine.groupInfo(session: session)
     let now = Int64(Date().timeIntervalSince1970)
     let existingConversation = try database.fetchConversationByGroupId(info.groupId)
-    let conversationId = existingConversation?.conversationId ?? info.groupId
+    let resolvedConversationId =
+      conversationId
+      ?? existingConversation?.conversationId
+      ?? info.groupId
 
     do {
-      try await cryptoState.persistJoinedSession(conversationId: conversationId, session: session)
+      try await cryptoState.persistJoinedSession(
+        conversationId: resolvedConversationId,
+        session: session
+      )
     } catch {
       Self.log.error(
         "Failed to persist joined session for welcome group \(info.groupId.hexString, privacy: .public): \(error.localizedDescription, privacy: .public)"
@@ -133,7 +140,7 @@ actor MessageProcessor {
     }
 
     let conversation = ConversationRecord(
-      conversationId: conversationId,
+      conversationId: resolvedConversationId,
       groupId: info.groupId,
       type: existingConversation?.type ?? 0,
       status: existingConversation?.status ?? 1,

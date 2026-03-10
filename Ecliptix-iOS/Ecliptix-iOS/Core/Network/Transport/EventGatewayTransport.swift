@@ -77,6 +77,28 @@ actor EventGatewayTransport {
     self.requestTimeout = requestTimeout
   }
 
+  func requestEnvelope(
+    serviceType: RpcServiceType,
+    rawPayload: Data,
+    connectId: UInt32? = nil,
+    exchangeType: PubKeyExchangeType = .dataCenterEphemeralConnect
+  ) throws -> EventEnvelope {
+    guard let route = GatewayRouteCatalog.route(for: serviceType) else {
+      throw NSError(
+        domain: "EventGatewayTransport",
+        code: -1,
+        userInfo: [NSLocalizedDescriptionKey: "No route for service type: \(serviceType.rawValue)"]
+      )
+    }
+    return GatewayTransportFactory.buildEnvelopeRaw(
+      route: route,
+      rawPayload: rawPayload,
+      metadataProvider: metadataProvider,
+      connectId: connectId,
+      exchangeType: exchangeType
+    )
+  }
+
   func unary(
     serviceType: RpcServiceType,
     payload: some SwiftProtobuf.Message,
@@ -92,13 +114,17 @@ actor EventGatewayTransport {
       "Gateway unary: service=\(serviceType.rawValue, privacy: .public), route=\(routeLabel, privacy: .public), exchange=\(exchangeType.rawStringValue, privacy: .public)"
     )
     do {
-      let envelope = try GatewayTransportFactory.buildEnvelope(
-        route: route,
-        payload: payload,
-        metadataProvider: metadataProvider,
-        connectId: connectId,
-        exchangeType: exchangeType
-      )
+      let payloadData = try payload.serializedData()
+      let envelope =
+        payload is ProtoSecureEnvelope && connectId != nil
+        ? GatewayTransportFactory.buildSecureCarrier(rawPayload: payloadData)
+        : GatewayTransportFactory.buildEnvelopeRaw(
+          route: route,
+          rawPayload: payloadData,
+          metadataProvider: metadataProvider,
+          connectId: connectId,
+          exchangeType: exchangeType
+        )
       let grpcClient = try await channelProvider.getClient()
       let gateway = GatewayServiceClient(wrapping: grpcClient)
       let request = GRPCCore.ClientRequest(
@@ -211,13 +237,17 @@ actor EventGatewayTransport {
       "Gateway stream: start service=\(serviceType.rawValue, privacy: .public), route=\(routeLabel, privacy: .public), exchange=\(exchangeType.rawStringValue, privacy: .public)"
     )
     do {
-      let envelope = try GatewayTransportFactory.buildEnvelope(
-        route: route,
-        payload: payload,
-        metadataProvider: metadataProvider,
-        connectId: connectId,
-        exchangeType: exchangeType
-      )
+      let payloadData = try payload.serializedData()
+      let envelope =
+        payload is ProtoSecureEnvelope && connectId != nil
+        ? GatewayTransportFactory.buildSecureCarrier(rawPayload: payloadData)
+        : GatewayTransportFactory.buildEnvelopeRaw(
+          route: route,
+          rawPayload: payloadData,
+          metadataProvider: metadataProvider,
+          connectId: connectId,
+          exchangeType: exchangeType
+        )
       let grpcClient = try await channelProvider.getClient()
       let gateway = GatewayServiceClient(wrapping: grpcClient)
       let request = GRPCCore.ClientRequest(

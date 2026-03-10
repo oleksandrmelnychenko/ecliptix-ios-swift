@@ -7,6 +7,14 @@ import os
 
 enum GatewayTransportFactory {
 
+  static func buildSecureCarrier(
+    rawPayload: Data
+  ) -> EventEnvelope {
+    var envelope = EventEnvelope()
+    envelope.payload = rawPayload
+    return envelope
+  }
+
   static func buildEnvelope(
     route: GatewayRoute,
     payload: some SwiftProtobuf.Message,
@@ -31,7 +39,7 @@ enum GatewayTransportFactory {
     clientCtx.platform = metadataProvider.platform
     var security = SecurityContext()
     if let connectId {
-      security.connectID = connectId
+      security.connectID = UInt64(connectId)
     }
     security.keyExchangeContext = exchangeType.rawStringValue
     security.clientTimestamp = Int64(Date().timeIntervalSince1970)
@@ -69,7 +77,7 @@ enum GatewayTransportFactory {
     clientCtx.platform = metadataProvider.platform
     var security = SecurityContext()
     if let connectId {
-      security.connectID = connectId
+      security.connectID = UInt64(connectId)
     }
     security.keyExchangeContext = exchangeType.rawStringValue
     security.clientTimestamp = Int64(Date().timeIntervalSince1970)

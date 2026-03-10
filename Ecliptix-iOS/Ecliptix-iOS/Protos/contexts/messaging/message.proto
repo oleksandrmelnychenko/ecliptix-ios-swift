@@ -89,6 +89,9 @@ message MessageEnvelope {
   optional bytes reply_to_message_id = 8;
   bool is_tombstoned = 9;
   bytes sender_account_id = 10;
+  optional google.protobuf.Timestamp expires_at = 11;
+  int32 thread_reply_count = 12;
+  optional google.protobuf.Timestamp thread_last_reply_at = 13;
 }
 
 message ChatMessage {
@@ -211,3 +214,52 @@ message ReactionRequest {
 }
 
 message ReactionResponse {}
+
+message PinMessageRequest {
+  bytes conversation_id = 1;
+  bytes message_id = 2;
+}
+
+message PinMessageResponse {}
+
+message UnpinMessageRequest {
+  bytes conversation_id = 1;
+  bytes message_id = 2;
+}
+
+message UnpinMessageResponse {}
+
+message ListPinnedMessagesRequest {
+  bytes conversation_id = 1;
+}
+
+message PinnedMessageInfo {
+  bytes message_id = 1;
+  bytes pinned_by = 2;
+  google.protobuf.Timestamp pinned_at = 3;
+}
+
+message ListPinnedMessagesResponse {
+  repeated PinnedMessageInfo pinned_messages = 1;
+}
+
+message ListThreadRepliesRequest {
+  bytes conversation_id = 1;
+  bytes parent_message_id = 2;
+  uint64 after_seq = 3;
+  uint32 limit = 4;
+}
+
+message ListThreadRepliesResponse {
+  repeated MessageEnvelope replies = 1;
+  bool has_more = 2;
+  int32 total_reply_count = 3;
+}
+
+message GetUnreadMentionsRequest {
+  bytes conversation_id = 1;
+}
+
+message GetUnreadMentionsResponse {
+  int64 unread_mention_count = 1;
+}

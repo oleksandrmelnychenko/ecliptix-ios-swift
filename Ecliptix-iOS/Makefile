@@ -1,7 +1,7 @@
 # Ecliptix iOS - Makefile
 # Convenient commands for development workflow
 
-.PHONY: help setup install-tools generate-protos clean build test xcode add-to-xcode
+.PHONY: help setup install-tools generate-protos validate-proto-contract clean build test xcode add-to-xcode
 
 # Default target
 help:
@@ -11,6 +11,7 @@ help:
 	@echo "  make setup           - Full setup (tools + dependencies + generate)"
 	@echo "  make install-tools   - Install protoc and gRPC tools"
 	@echo "  make generate-protos - Generate Swift code from .proto files"
+	@echo "  make validate-proto-contract - Compare iOS protos against server wire contract"
 	@echo "  make clean           - Clean generated files and build artifacts"
 	@echo "  make build           - Build Xcode project"
 	@echo "  make test            - Run tests"
@@ -34,6 +35,10 @@ install-tools:
 generate-protos:
 	@echo "⚙️  Generating Swift code from protos..."
 	@./Scripts/generate-protos.sh
+
+validate-proto-contract:
+	@echo "🔎 Validating proto contract..."
+	@./Scripts/validate-proto-contract.py
 
 # Clean generated files
 clean:

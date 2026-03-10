@@ -103,8 +103,16 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
           "\(AppConstants.Network.Request.noActiveSessionPrefix) \(context.connectId)"))
     }
 
+    let requestEnvelopeResult = await buildRequestEnvelopePayload(context: context)
+    guard case .ok(let requestEnvelopePayload) = requestEnvelopeResult else {
+      AppLogger.network.warning(
+        "Request pipeline: failed to build secure request envelope service=\(context.serviceType.rawValue, privacy: .public), connectId=\(context.connectId, privacy: .public), error=\(requestEnvelopeResult.err()?.message ?? "", privacy: .public)"
+      )
+      return requestEnvelopeResult.propagateErr()
+    }
+
     let encryptResult = encryptRequestPayload(
-      plainBuffer: context.plainBuffer,
+      plainBuffer: requestEnvelopePayload,
       session: session
     )
     guard case .ok(let encryptedPayload) = encryptResult else {
@@ -193,6 +201,27 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
     }
   }
 
+  private func buildRequestEnvelopePayload(
+    context: ServiceRequestContext
+  ) async -> Result<Data, NetworkFailure> {
+    let envelopeResult = await rpcServiceManager.requestEnvelope(
+      serviceType: context.serviceType,
+      rawPayload: context.plainBuffer,
+      connectId: context.connectId,
+      exchangeType: context.exchangeType
+    )
+    guard let envelope = envelopeResult.ok() else {
+      return .err(.invalidRequestType(envelopeResult.unwrapErr().logDescription))
+    }
+    do {
+      return .ok(try envelope.serializedData())
+    } catch {
+      return .err(
+        .invalidRequestType(
+          "Failed to serialize secure request envelope: \(error.localizedDescription)"))
+    }
+  }
+
   private func decryptResponsePayload(
     encryptedPayload: Data,
     session: NativeProtocolSession
@@ -246,18 +275,13 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
 
     let transportResult = await rpcServiceManager.unary(
       serviceType: serviceType,
-      payload: secureEnvelope
+      payload: secureEnvelope,
+      connectId: connectId
     )
     guard let responseEnvelope = transportResult.ok() else {
       let rpcError = transportResult.unwrapErr()
       AppLogger.network.warning(
         "Unary RPC: transport failed service=\(serviceType.rawValue, privacy: .public), connectId=\(connectId, privacy: .public), error=\(rpcError.logDescription, privacy: .public)"
-      )
-      return .err(mapTransportError(rpcError))
-    }
-    if let rpcError = GatewayTransportFactory.mapOutcome(responseEnvelope.metadata) {
-      AppLogger.network.warning(
-        "Unary RPC: server outcome error service=\(serviceType.rawValue, privacy: .public), connectId=\(connectId, privacy: .public), outcome=\(rpcError.logDescription, privacy: .public)"
       )
       return .err(mapTransportError(rpcError))
     }
@@ -281,7 +305,21 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
     AppLogger.network.debug(
       "Unary RPC: completed service=\(serviceType.rawValue, privacy: .public), connectId=\(connectId, privacy: .public), responseBytes=\(decrypted.count, privacy: .public)"
     )
-    return await onCompleted(decrypted)
+    let innerResponseEnvelope: EventEnvelope
+    do {
+      innerResponseEnvelope = try EventEnvelope(serializedBytes: decrypted)
+    } catch {
+      return .err(
+        .invalidRequestType(
+          "Failed to decode secure response envelope: \(error.localizedDescription)"))
+    }
+    if let rpcError = GatewayTransportFactory.mapOutcome(innerResponseEnvelope.metadata) {
+      AppLogger.network.warning(
+        "Unary RPC: server outcome error service=\(serviceType.rawValue, privacy: .public), connectId=\(connectId, privacy: .public), outcome=\(rpcError.logDescription, privacy: .public)"
+      )
+      return .err(mapTransportError(rpcError))
+    }
+    return await onCompleted(innerResponseEnvelope.payload)
   }
 
   private func executeStreamingRpc(
@@ -309,16 +347,9 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
     let streamResult = await rpcServiceManager.serverStream(
       serviceType: serviceType,
       payload: secureEnvelope,
+      connectId: connectId,
       exchangeType: exchangeType
     ) { responseEnvelope in
-      if let rpcError = GatewayTransportFactory.mapOutcome(responseEnvelope.metadata) {
-        streamLock.withLock {
-          if streamCallbackError == nil {
-            streamCallbackError = self.mapTransportError(rpcError)
-          }
-        }
-        return
-      }
       if responseEnvelope.payload.isEmpty {
         AppLogger.network.debug(
           "Stream RPC: metadata-only item service=\(serviceType.rawValue, privacy: .public), connectId=\(connectId, privacy: .public)"
@@ -359,7 +390,28 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
         return
       }
 
-      let callbackResult = await onStreamItem(decrypted)
+      let innerResponseEnvelope: EventEnvelope
+      do {
+        innerResponseEnvelope = try EventEnvelope(serializedBytes: decrypted)
+      } catch {
+        streamLock.withLock {
+          if streamCallbackError == nil {
+            streamCallbackError = .invalidRequestType(
+              "Failed to decode secure stream envelope: \(error.localizedDescription)")
+          }
+        }
+        return
+      }
+      if let rpcError = GatewayTransportFactory.mapOutcome(innerResponseEnvelope.metadata) {
+        streamLock.withLock {
+          if streamCallbackError == nil {
+            streamCallbackError = self.mapTransportError(rpcError)
+          }
+        }
+        return
+      }
+
+      let callbackResult = await onStreamItem(innerResponseEnvelope.payload)
       if let callbackError = callbackResult.err() {
         streamLock.withLock {
           if streamCallbackError == nil {
@@ -390,8 +442,18 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
   private func mapTransportError(_ error: RpcError) -> NetworkFailure {
     let desc = error.logDescription
     switch error {
-    case .grpcError(let code, _):
+    case .grpcError(let code, let message):
       let lower = code.lowercased()
+      let normalizedMessage = message.lowercased()
+      if lower == AppConstants.Network.GrpcError.unauthenticated
+        && normalizedMessage.contains(ServerErrorCode.Session.reinitRequired)
+      {
+        return NetworkFailure(
+          failureType: .protocolStateMismatch,
+          message: desc,
+          requiresReinit: true
+        )
+      }
       switch lower {
       case AppConstants.Network.GrpcError.unavailable,
         AppConstants.Network.GrpcError.deadlineExceeded,
