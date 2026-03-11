@@ -16,6 +16,7 @@ extension NetworkProvider {
   func cleanupSession(connectId: UInt32) async {
     nativeSessions.remove(connectId: connectId)
     _ = await dependencies.stateStorage.deleteSessionState(for: connectId)
+    _ = await protocolStateStorage.deleteState(connectId: String(connectId))
   }
 
   func cleanupAllSessions() async {

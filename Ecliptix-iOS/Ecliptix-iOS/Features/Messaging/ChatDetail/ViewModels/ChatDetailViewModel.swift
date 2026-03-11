@@ -114,6 +114,9 @@ final class ChatDetailViewModel: Resettable {
     AppLogger.messaging.debug(
       "ChatDetail: appended incoming message \(envelope.messageID.hexString, privacy: .public)"
     )
+    if !item.isOwnMessage {
+      Task { await markAsRead() }
+    }
   }
 
   private func mapIncomingEnvelope(
@@ -211,6 +214,8 @@ final class ChatDetailViewModel: Resettable {
 
     let connectId = connectIdProvider(.dataCenterEphemeralConnect)
 
+    await loadConversationInfo(connectId: connectId)
+
     let result = await messagingService.listMessages(
       conversationId: conversationId,
       pageSize: 50,
@@ -253,6 +258,7 @@ final class ChatDetailViewModel: Resettable {
     switch result {
     case .ok(let response):
       let newMessages = response.messages.map { mapMessage($0) }
+        .filter { !knownMessageIds.contains($0.id) }
       knownMessageIds.formUnion(newMessages.map(\.id))
       messages.insert(contentsOf: newMessages, at: 0)
       hasMoreMessages = response.hasMore_p
@@ -329,6 +335,9 @@ final class ChatDetailViewModel: Resettable {
     )
     if let error = deleteResult.err() {
       AppLogger.messaging.warning("Failed to delete message: \(error, privacy: .public)")
+      hasError = true
+      errorMessage = error.userFacingMessage
+      return
     }
     messages.removeAll { $0.id == id }
   }
@@ -453,6 +462,25 @@ final class ChatDetailViewModel: Resettable {
     showScrollToBottom = false
     typingUserName = ""
     isTyping = false
+  }
+
+  private func loadConversationInfo(connectId: UInt32) async {
+    let result = await messagingService.getConversation(
+      conversationId: conversationId,
+      connectId: connectId
+    )
+    if case .ok(let response) = result {
+      let conv = response.conversation
+      conversationTitle = conv.title
+      isGroup = conv.type == .group
+      if conv.hasAvatarURL {
+        conversationAvatarUrl = conv.avatarURL
+      }
+    } else if case .err(let rpcError) = result {
+      AppLogger.messaging.warning(
+        "ChatDetail: failed to load conversation info: \(rpcError.logDescription, privacy: .public)"
+      )
+    }
   }
 
   private var currentMembershipId: Data? {

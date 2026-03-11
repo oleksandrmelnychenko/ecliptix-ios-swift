@@ -11,7 +11,7 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
   private let rpcServiceManager: RpcServiceManager
   private let requestRegistry: NetworkProviderRequestRegistry
   private let outageState: NetworkProviderOutageState
-  private let recoverSession: @Sendable (UInt32) async -> Result<Unit, String>
+  private let recoverSession: @Sendable (UInt32, PubKeyExchangeType) async -> Result<Unit, String>
   private let clearConnection: @Sendable (UInt32) -> Void
   private let retryPendingRequests: @Sendable () async -> Void
 
@@ -20,7 +20,7 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
     rpcServiceManager: RpcServiceManager,
     requestRegistry: NetworkProviderRequestRegistry,
     outageState: NetworkProviderOutageState,
-    recoverSession: @escaping @Sendable (UInt32) async -> Result<Unit, String>,
+    recoverSession: @escaping @Sendable (UInt32, PubKeyExchangeType) async -> Result<Unit, String>,
     clearConnection: @escaping @Sendable (UInt32) -> Void,
     retryPendingRequests: @escaping @Sendable () async -> Void
   ) {
@@ -151,7 +151,7 @@ final class NetworkEncryptedRequestExecutor: @unchecked Sendable {
         "Request pipeline: server requested session re-init service=\(context.serviceType.rawValue, privacy: .public), connectId=\(context.connectId, privacy: .public)"
       )
       sessionRuntime.invalidateSession(connectId: context.connectId)
-      let reinitResult = await recoverSession(context.connectId)
+      let reinitResult = await recoverSession(context.connectId, context.exchangeType)
       guard reinitResult.isOk else {
         let reinitError = reinitResult.err() ?? ""
         clearConnection(context.connectId)

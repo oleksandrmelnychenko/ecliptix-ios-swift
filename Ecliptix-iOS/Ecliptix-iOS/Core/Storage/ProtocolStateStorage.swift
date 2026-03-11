@@ -276,7 +276,32 @@ final class ProtocolStateStorage {
     }
   }
 
+  func deleteState(connectId: String, accountId: Data) async -> Result<Unit, String> {
+    guard !connectId.isEmpty else {
+      return .err("Connect ID cannot be empty")
+    }
+    guard accountId.count == AppConstants.Crypto.guidBytesCount else {
+      return await deleteStateAllAccounts(connectId: connectId)
+    }
+    return lock.withLock {
+      let fileURL = stateFileURL(connectId: connectId, accountId: accountId)
+      guard fileManager.fileExists(atPath: fileURL.path) else {
+        return .ok(Unit.value)
+      }
+      do {
+        try fileManager.removeItem(at: fileURL)
+        return .ok(Unit.value)
+      } catch {
+        return .err("Failed to delete state: \(error.localizedDescription)")
+      }
+    }
+  }
+
   func deleteState(connectId: String) async -> Result<Unit, String> {
+    await deleteStateAllAccounts(connectId: connectId)
+  }
+
+  private func deleteStateAllAccounts(connectId: String) -> Result<Unit, String> {
     guard !connectId.isEmpty else {
       return .err("Connect ID cannot be empty")
     }

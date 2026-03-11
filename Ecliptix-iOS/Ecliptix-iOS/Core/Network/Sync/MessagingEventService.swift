@@ -95,6 +95,7 @@ actor MessagingEventService {
 
   private func runStream() async {
     state = .streaming
+    retryCount = 0
     let connectId = connectIdProvider(.dataCenterEphemeralConnect)
     Self.log.info(
       "MessagingEventService: delivery stream connecting connectId=\(connectId, privacy: .public)"
@@ -150,6 +151,7 @@ actor MessagingEventService {
   }
 
   private func runTypingStream() async {
+    typingRetryCount = 0
     let connectId = connectIdProvider(.dataCenterEphemeralConnect)
     Self.log.info(
       "MessagingEventService: typing stream connecting connectId=\(connectId, privacy: .public)"

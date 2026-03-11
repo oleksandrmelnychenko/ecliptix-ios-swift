@@ -18,7 +18,11 @@ protocol SecureSessionClient: AnyObject {
     minExternalCounter: UInt64
   ) async -> Result<Unit, String>
 
-  func establishSecrecyChannel(connectId: UInt32) async -> Result<Unit, String>
+  func establishSecrecyChannel(
+    connectId: UInt32,
+    exchangeType: PubKeyExchangeType
+  ) async -> Result<Unit, String>
+
   @discardableResult
   func initiateProtocol(
     deviceId: UUID,
@@ -41,6 +45,13 @@ protocol SecureSessionClient: AnyObject {
   ) async -> Result<Unit, String>
 
   func getServerPublicKey(connectId: UInt32) async -> Result<Data, NetworkFailure>
+}
+
+extension SecureSessionClient {
+
+  func establishSecrecyChannel(connectId: UInt32) async -> Result<Unit, String> {
+    await establishSecrecyChannel(connectId: connectId, exchangeType: .dataCenterEphemeralConnect)
+  }
 }
 
 protocol ApplicationBootstrapClient: SecureSessionClient {

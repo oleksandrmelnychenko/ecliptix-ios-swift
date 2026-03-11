@@ -120,8 +120,15 @@ final class SessionBootstrapService {
       accountId: accountIdData
     )
     guard let (sealedState, minExternalCounter) = loadResult.ok() else {
-      AppLogger.security.debug(
-        "Restore state: no persisted file for connectId=\(connectId, privacy: .public)")
+      if let loadError = loadResult.err() {
+        AppLogger.security.warning(
+          "Restore state: corrupted persisted state for connectId=\(connectId, privacy: .public), error=\(loadError, privacy: .public), deleting"
+        )
+        _ = await protocolStateStorage.deleteState(connectId: String(connectId))
+      } else {
+        AppLogger.security.debug(
+          "Restore state: no persisted file for connectId=\(connectId, privacy: .public)")
+      }
       return .ok(false)
     }
     AppLogger.security.debug(

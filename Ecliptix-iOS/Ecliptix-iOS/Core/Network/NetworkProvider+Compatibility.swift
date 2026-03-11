@@ -126,11 +126,14 @@ extension NetworkProvider {
     }
   }
 
-  func establishSecrecyChannel(connectId: UInt32) async -> Result<Unit, String> {
+  func establishSecrecyChannel(
+    connectId: UInt32,
+    exchangeType: PubKeyExchangeType = .dataCenterEphemeralConnect
+  ) async -> Result<Unit, String> {
     let result = await establishSecrecyChannel(
       request: SecrecyChannelRequest(
         connectId: connectId,
-        exchangeType: .dataCenterEphemeralConnect
+        exchangeType: exchangeType
       )
     )
     if result.isOk {

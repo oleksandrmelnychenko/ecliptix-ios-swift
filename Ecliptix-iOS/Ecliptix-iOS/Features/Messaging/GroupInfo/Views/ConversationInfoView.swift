@@ -7,6 +7,7 @@ struct ConversationInfoView: View {
 
   @State var viewModel: ConversationInfoViewModel
   var onNavigate: (MessagesNavigationDestination) -> Void
+  @Environment(\.dismiss) private var dismiss
   @State private var showLeaveConfirmation = false
   @State private var memberToRemove: MemberDisplayItem?
 
@@ -58,6 +59,7 @@ struct ConversationInfoView: View {
         Section {
           if viewModel.isAdmin {
             Button {
+              onNavigate(.addMembers(conversationId: viewModel.conversationId))
             } label: {
               Label(String(localized: "Add Members"), systemImage: "person.badge.plus")
                 .foregroundColor(.ecliptixAccent)
@@ -100,6 +102,11 @@ struct ConversationInfoView: View {
     )
     .navigationBarTitleDisplayMode(.inline)
     .task { await viewModel.loadInfo() }
+    .onChange(of: viewModel.didLeaveGroup) {
+      if viewModel.didLeaveGroup {
+        dismiss()
+      }
+    }
     .alert(String(localized: "Leave Group"), isPresented: $showLeaveConfirmation) {
       Button(String(localized: "Leave"), role: .destructive) {
         Task { await viewModel.leaveGroup() }

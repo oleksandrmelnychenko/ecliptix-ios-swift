@@ -25,6 +25,7 @@ final class ConversationListViewModel: Resettable {
   private let connectIdProvider: (PubKeyExchangeType) -> UInt32
   private var incomingMessageTask: Task<Void, Never>?
   private var pendingRefreshTask: Task<Void, Never>?
+  private var recentlySeenMessageIds: Set<Data> = []
 
   init(
     messagingService: MessagingRpcService,
@@ -39,6 +40,7 @@ final class ConversationListViewModel: Resettable {
   func loadConversations() async {
     isLoading = true
     defer { isLoading = false }
+    recentlySeenMessageIds.removeAll()
 
     hasError = false
     errorMessage = ""
@@ -236,6 +238,10 @@ final class ConversationListViewModel: Resettable {
   }
 
   private func handleIncomingMessage(conversationId: Data, envelope: ProtoMessageEnvelope) {
+    let messageId = envelope.messageID
+    guard !messageId.isEmpty, !recentlySeenMessageIds.contains(messageId) else { return }
+    recentlySeenMessageIds.insert(messageId)
+
     guard let index = allConversations.firstIndex(where: { $0.id == conversationId }) else {
       scheduleRefresh()
       return

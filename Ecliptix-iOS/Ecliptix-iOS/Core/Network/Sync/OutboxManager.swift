@@ -151,6 +151,9 @@ actor OutboxManager {
     case .err(let error):
       Self.log.warning(
         "Failed to send outbox entry id=\(entry.id ?? -1): \(error, privacy: .public)")
+      if isTerminalRpcError(error) {
+        return .terminalFailure(error.logDescription)
+      }
       return .retryableFailure
     }
   }
@@ -209,6 +212,21 @@ actor OutboxManager {
         "reason": reason,
       ]
     )
+  }
+
+  private func isTerminalRpcError(_ error: RpcError) -> Bool {
+    switch error {
+    case .serializationFailed, .deserializationFailed:
+      return true
+    case .grpcError(let code, _):
+      let lower = code.lowercased()
+      return lower == "invalid_argument" || lower == "not_found"
+        || lower == "permission_denied" || lower == "unimplemented"
+    case .serverError(let code, _):
+      return code.hasPrefix("payload.") || code.hasPrefix("schema.")
+    default:
+      return false
+    }
   }
 }
 

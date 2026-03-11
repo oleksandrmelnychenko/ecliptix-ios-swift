@@ -535,4 +535,30 @@ extension AppDatabase {
       )
     }
   }
+
+  func saveMessageAndUpdateConversation(
+    _ message: MessageRecord,
+    conversationId: Data,
+    lastMessageAt: Int64,
+    lastMessagePreview: String?
+  ) throws {
+    try dbPool.write { db in
+      let isNewMessage = try MessageRecord.fetchOne(db, key: message.messageId) == nil
+      var record = message
+      try record.save(db)
+      guard isNewMessage else { return }
+      if var conv = try ConversationRecord.fetchOne(db, key: conversationId) {
+        if lastMessageAt >= (conv.lastMessageAt ?? 0) {
+          conv.lastMessageAt = lastMessageAt
+          conv.lastMessagePreview = lastMessagePreview
+        }
+        conv.updatedAt = Int64(Date().timeIntervalSince1970)
+        try conv.update(db)
+      }
+      try db.execute(
+        sql: "UPDATE conversation SET unreadCount = unreadCount + 1 WHERE conversationId = ?",
+        arguments: [conversationId]
+      )
+    }
+  }
 }

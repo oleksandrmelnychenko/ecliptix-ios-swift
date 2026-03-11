@@ -126,15 +126,15 @@ actor SyncManager {
           totalProcessed += 1
         }
 
-        if let lastEvent = batch.events.last {
+        let ackSuccess = await acknowledgeProcessedEvents(processedEventSeqs)
+
+        if let lastEvent = batch.events.last, ackSuccess {
           try database.setSyncState(
             key: SyncStateRecord.Keys.lastEventId,
             value: String(lastEvent.serverSeq)
           )
           cursor = lastEvent.serverSeq
         }
-
-        await acknowledgeProcessedEventsIfNeeded(processedEventSeqs)
         if !batch.hasMore_p {
           break
         }
@@ -202,11 +202,13 @@ actor SyncManager {
       do {
         let event = try InternalPendingEvent(serializedBytes: envelope.payload)
         try await self.processIncomingEvent(event)
-        try self.database.setSyncState(
-          key: SyncStateRecord.Keys.lastEventId,
-          value: String(event.serverSeq)
-        )
-        await self.acknowledgeProcessedEventsIfNeeded([event.serverSeq])
+        let acked = await self.acknowledgeProcessedEvents([event.serverSeq])
+        if acked {
+          try self.database.setSyncState(
+            key: SyncStateRecord.Keys.lastEventId,
+            value: String(event.serverSeq)
+          )
+        }
       } catch {
         await self.handleStreamProcessingFailure(error)
       }
@@ -304,13 +306,18 @@ actor SyncManager {
         )
         throw Failure.cryptoError("No matching key package secrets available for Welcome processing")
       }
-      try await messageProcessor.processWelcome(
-        welcomeBytes: event.payload,
-        senderDeviceId: event.senderDevice,
-        identity: identity,
-        secrets: secrets,
-        conversationId: conversationId
-      )
+      do {
+        try await messageProcessor.processWelcome(
+          welcomeBytes: event.payload,
+          senderDeviceId: event.senderDevice,
+          identity: identity,
+          secrets: secrets,
+          conversationId: conversationId
+        )
+      } catch {
+        await cryptoState.restoreKeyPackageSecrets([(hash: event.targetKeyPackageHash, secrets: secrets)])
+        throw error
+      }
       return
     }
 
@@ -353,6 +360,7 @@ actor SyncManager {
       }
     }
 
+    await cryptoState.restoreKeyPackageSecrets(candidates)
     throw Failure.cryptoError("No matching key package secrets available for Welcome processing")
   }
 
@@ -557,14 +565,17 @@ actor SyncManager {
     }
   }
 
-  private func acknowledgeProcessedEventsIfNeeded(_ serverSeqs: [Int64]) async {
-    guard !serverSeqs.isEmpty else { return }
+  @discardableResult
+  private func acknowledgeProcessedEvents(_ serverSeqs: [Int64]) async -> Bool {
+    guard !serverSeqs.isEmpty else { return true }
     do {
       try await acknowledgeEvents(serverSeqs)
+      return true
     } catch {
       Self.log.warning(
         "Failed to acknowledge \(serverSeqs.count) E2E events: \(error.localizedDescription, privacy: .public)"
       )
+      return false
     }
   }
 

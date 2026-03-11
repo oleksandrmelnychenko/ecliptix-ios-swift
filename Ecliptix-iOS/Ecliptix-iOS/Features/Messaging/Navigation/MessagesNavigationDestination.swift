@@ -14,4 +14,5 @@ enum MessagesNavigationDestination: Hashable {
   case channelFeed(channelId: Data)
   case channelInfo(channelId: Data)
   case channelCreation
+  case addMembers(conversationId: Data)
 }

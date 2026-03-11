@@ -20,6 +20,7 @@ final class ConversationInfoViewModel: Resettable {
   var muteStatus: ProtoMuteStatus = .unmuted
   var hasError: Bool = false
   var errorMessage: String = ""
+  var didLeaveGroup: Bool = false
 
   private let messagingService: MessagingRpcService
   private let settingsProvider: () -> ApplicationInstanceSettings?
@@ -226,7 +227,11 @@ final class ConversationInfoViewModel: Resettable {
     )
     if let error = leaveResult.err() {
       AppLogger.messaging.warning("Failed to leave group: \(error, privacy: .public)")
+      hasError = true
+      errorMessage = error.userFacingMessage
+      return
     }
+    didLeaveGroup = true
   }
 
   func muteConversation(_ status: ProtoMuteStatus) async {

@@ -59,13 +59,12 @@ actor MessageProcessor {
 
     if let record = messageRecord {
       do {
-        try database.saveMessage(record)
-        try database.updateConversationPreview(
+        try database.saveMessageAndUpdateConversation(
+          record,
           conversationId: conversationId,
           lastMessageAt: record.sentAt,
           lastMessagePreview: record.textContent
         )
-        try database.incrementUnreadCount(conversationId: conversationId)
         Self.log.debug(
           "Stored message \(record.messageId.hexString, privacy: .public) in conversation \(conversationId.hexString, privacy: .public)"
         )

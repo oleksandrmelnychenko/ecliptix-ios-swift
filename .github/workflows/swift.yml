@@ -1,0 +1,37 @@
+name: Swift
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+
+    - name: Build
+      run: |
+        xcodebuild build \
+          -project Ecliptix-iOS/Ecliptix-iOS.xcodeproj \
+          -scheme Ecliptix-iOS \
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+          CODE_SIGNING_ALLOWED=NO \
+          -skipPackagePluginValidation \
+          | tail -20
+
+    - name: Run tests
+      run: |
+        xcodebuild test \
+          -project Ecliptix-iOS/Ecliptix-iOS.xcodeproj \
+          -scheme Ecliptix-iOS \
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+          CODE_SIGNING_ALLOWED=NO \
+          -skipPackagePluginValidation \
+          | tail -50

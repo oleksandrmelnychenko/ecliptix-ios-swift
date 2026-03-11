@@ -92,6 +92,19 @@ enum MessagesViewBuilder {
           path.wrappedValue.append(.channelFeed(channelId: channelId))
         }
       )
+    case .addMembers(let conversationId):
+      NewGroupView(
+        viewModel: coordinator.dependencies.makeNewGroupViewModel(),
+        onContinue: { memberIds in
+          let vm = coordinator.dependencies.makeConversationInfoViewModel(
+            conversationId: conversationId)
+          Task {
+            await vm.addMembers(memberIds)
+            path.wrappedValue.removeLast()
+          }
+        }
+      )
+      .navigationTitle(String(localized: "Add Members"))
     }
   }
 }

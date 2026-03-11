@@ -61,8 +61,8 @@ extension NetworkProvider {
       rpcServiceManager: rpcServiceManager,
       requestRegistry: runtime.requestRegistry,
       outageState: runtime.outageState,
-      recoverSession: { [self] connectId in
-        await establishSecrecyChannel(connectId: connectId)
+      recoverSession: { [self] connectId, exchangeType in
+        await establishSecrecyChannel(connectId: connectId, exchangeType: exchangeType)
       },
       clearConnection: { [self] connectId in
         clearConnection(connectId: connectId)
