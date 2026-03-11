@@ -16,7 +16,9 @@ service ChatInternal {
   rpc EditMessage(InternalEditRequest) returns (ecliptix.proto.messaging.EditMessageResponse);
   rpc DeleteMessage(InternalDeleteRequest) returns (ecliptix.proto.messaging.DeleteMessageResponse);
   rpc SyncMessages(InternalSyncRequest) returns (ecliptix.proto.messaging.SyncMessagesResponse);
+  rpc ListMessages(InternalListMessagesRequest) returns (ecliptix.proto.messaging.ListMessagesResponse);
   rpc CreateConversation(InternalCreateConversationRequest) returns (ecliptix.proto.messaging.CreateConversationResponse);
+  rpc CreateDirectConversation(InternalCreateDirectConversationRequest) returns (ecliptix.proto.messaging.CreateDirectConversationResponse);
   rpc ListConversations(InternalListConversationsRequest) returns (ecliptix.proto.messaging.ListConversationsResponse);
   rpc GetConversation(InternalGetConversationRequest) returns (ecliptix.proto.messaging.GetConversationResponse);
   rpc MuteConversation(InternalMuteRequest) returns (ecliptix.proto.messaging.ConversationActionResponse);
@@ -80,11 +82,24 @@ message InternalSyncRequest {
   bytes account_id = 3;
 }
 
+message InternalListMessagesRequest {
+  bytes membership_id = 1;
+  ecliptix.proto.messaging.ListMessagesRequest request = 2;
+  bytes account_id = 3;
+}
+
 message InternalCreateConversationRequest {
   bytes creator_membership_id = 1;
   ecliptix.proto.messaging.CreateConversationRequest request = 2;
   bytes creator_account_id = 3;
   repeated bytes participant_account_ids = 4;
+}
+
+message InternalCreateDirectConversationRequest {
+  bytes creator_membership_id = 1;
+  bytes creator_account_id = 2;
+  bytes recipient_membership_id = 3;
+  optional bytes recipient_account_id = 4;
 }
 
 message InternalListConversationsRequest {
