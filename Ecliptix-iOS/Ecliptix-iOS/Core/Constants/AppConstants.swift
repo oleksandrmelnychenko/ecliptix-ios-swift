@@ -92,7 +92,7 @@ enum AppConstants {
     }
     #if DEBUG
       static let simulatorDebugHost = "127.0.0.1"
-      static let deviceDebugHost = "192.168.110.105"
+      static let deviceDebugHost = "192.168.110.126"
     #endif
   }
 

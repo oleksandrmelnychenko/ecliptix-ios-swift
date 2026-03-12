@@ -105,9 +105,9 @@ final class AppFlowResolver {
     }
 
     switch creationStatus {
-    case .secureKeySet:
+    case .primaryCredentialSet:
       return .pinSetup
-    case .passphraseSet:
+    case .pinCredentialSet:
       return .pinEntry
     }
   }
@@ -163,13 +163,13 @@ final class AppFlowResolver {
       case .otpVerified:
         return secureKeyRoute
 
-      case .secureKeySet:
+      case .primaryCredentialSet:
         guard settings.currentAccountId != nil else {
           return secureKeyRoute
         }
         return .pinSetup(mobileNumber: membership.mobileNumber)
 
-      case .pinSet:
+      case .pinCredentialSet:
         guard settings.currentAccountId != nil else {
           return secureKeyRoute
         }

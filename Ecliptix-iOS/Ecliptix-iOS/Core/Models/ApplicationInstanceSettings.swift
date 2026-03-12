@@ -4,8 +4,8 @@ import Foundation
 
 enum RegistrationCheckpoint: String, Codable {
   case otpVerified
-  case secureKeySet
-  case pinSet
+  case primaryCredentialSet
+  case pinCredentialSet
   case profileCompleted
 }
 

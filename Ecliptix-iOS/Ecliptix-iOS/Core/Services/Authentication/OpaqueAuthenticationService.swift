@@ -7,7 +7,7 @@ import os.log
 
 final class OpaqueAuthenticationService: @unchecked Sendable {
 
-  private let secureSessionClient: any SecureSessionClient
+  private let secureSessionClient: any SecureSessionClient & SessionRecoveryCoordinating
   private let outageController: any NetworkOutageControlling
   private let authenticationRpcService: AuthenticationRpcService
   private let identityService: IdentityService
@@ -15,7 +15,8 @@ final class OpaqueAuthenticationService: @unchecked Sendable {
   private let agentCache = OpaqueAgentCache()
 
   init(
-    secureSessionClient: any SecureSessionClient & NetworkOutageControlling,
+    secureSessionClient: any SecureSessionClient & NetworkOutageControlling
+      & SessionRecoveryCoordinating,
     authenticationRpcService: AuthenticationRpcService,
     identityService: IdentityService,
     secureStorageService: SecureStorageService
@@ -30,7 +31,7 @@ final class OpaqueAuthenticationService: @unchecked Sendable {
   func signIn(
     mobileNumber: String,
     secureKey: SecureTextBuffer,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<SignInOutcome, AuthenticationFailure> {
     AppLogger.auth.info(
       "OpaqueSignIn: start connectId=\(connectId, privacy: .public), mobile=\(mobileNumber, privacy: .private(mask: .hash))"
@@ -202,25 +203,33 @@ final class OpaqueAuthenticationService: @unchecked Sendable {
       let creationStatus: SignInCreationStatus
       if finalizeResponse.membership.hasCreationStatus {
         switch finalizeResponse.membership.creationStatus {
-        case .secureKeySet:
-          creationStatus = .secureKeySet
-        case .passphraseSet:
-          creationStatus = .passphraseSet
+        case .primaryCredentialSet:
+          creationStatus = .primaryCredentialSet
+        case .pinCredentialSet:
+          creationStatus = .pinCredentialSet
         default:
-          creationStatus = .passphraseSet
+          creationStatus = .pinCredentialSet
         }
       } else {
-        creationStatus = .passphraseSet
+        creationStatus = .pinCredentialSet
       }
 
       let membership = Membership(
         membershipId: membershipId,
         mobileNumber: mobileNumber
       )
-      let checkpoint: RegistrationCheckpoint =
-        creationStatus == .secureKeySet
-        ? .secureKeySet
-        : .profileCompleted
+      let checkpoint: RegistrationCheckpoint
+      if creationStatus == .primaryCredentialSet {
+        let currentCheckpoint = secureStorageService.settings?.registrationCheckpoint
+        switch currentCheckpoint {
+        case .pinCredentialSet, .profileCompleted:
+          checkpoint = currentCheckpoint!
+        default:
+          checkpoint = .primaryCredentialSet
+        }
+      } else {
+        checkpoint = .profileCompleted
+      }
       let persistStateResult = await secureStorageService.setRegistrationState(
         membership: membership,
         accountId: accountId,
@@ -288,7 +297,7 @@ final class OpaqueAuthenticationService: @unchecked Sendable {
     }
   }
 
-  func ensureActiveSession(preferredConnectId: UInt32) async -> Result<UInt32, String> {
+  func ensureActiveSession(preferredConnectId: ConnectId) async -> Result<ConnectId, String> {
     if secureSessionClient.activeSession(connectId: preferredConnectId) != nil {
       return .ok(preferredConnectId)
     }
@@ -296,15 +305,19 @@ final class OpaqueAuthenticationService: @unchecked Sendable {
     let settings = secureStorageService.settings
     let deviceId = settings?.deviceId ?? NetworkConfiguration.default.deviceId
     let appInstanceId = settings?.appInstanceId ?? NetworkConfiguration.default.appInstanceId
-    secureSessionClient.initiateProtocol(
-      deviceId: deviceId,
-      appInstanceId: appInstanceId,
-      connectId: preferredConnectId
-    )
     AppLogger.network.debug(
       "No active session for connectId=\(preferredConnectId), establishing secrecy channel")
-    let establishResult = await secureSessionClient.establishSecrecyChannel(
-      connectId: preferredConnectId)
+    let establishResult = await secureSessionClient.coordinatedEstablishSecrecyChannel(
+      connectId: preferredConnectId,
+      exchangeType: .dataCenterEphemeralConnect,
+      prepareProtocol: { [self, deviceId, appInstanceId] in
+        secureSessionClient.initiateProtocol(
+          deviceId: deviceId,
+          appInstanceId: appInstanceId,
+          connectId: preferredConnectId
+        )
+      }
+    )
     guard establishResult.isOk else {
       return .err(
         "Failed to establish secure session for connectId \(preferredConnectId): \(establishResult.err() ?? "Unknown error")"
@@ -342,7 +355,7 @@ extension OpaqueAuthenticationService {
     masterKey: Data,
     membershipId: UUID,
     accountId: UUID,
-    connectId: UInt32,
+    connectId: ConnectId,
     maxAttempts: Int = 3
   ) async -> Result<Unit, String> {
     var lastError = ""
@@ -384,8 +397,8 @@ extension OpaqueAuthenticationService {
 }
 
 enum SignInCreationStatus {
-  case secureKeySet
-  case passphraseSet
+  case primaryCredentialSet
+  case pinCredentialSet
 }
 
 struct SignInOutcome {

@@ -104,7 +104,7 @@ final class OpaqueRegistrationService: @unchecked Sendable {
   ) async -> Result<RegistrationNextStep, String> {
     if !availability.canRegister && !availability.canContinue {
       switch availability.status {
-      case .takenActive, .takenInactive:
+      case .mobileNumberAvailabilityTakenActive, .mobileNumberAvailabilityTakenInactive:
         return .ok(.onboarding)
       default:
         let statusRaw = availability.status.rawValue
@@ -112,7 +112,7 @@ final class OpaqueRegistrationService: @unchecked Sendable {
         return .err(error)
       }
     }
-    if availability.status == .incompleteRegistration,
+    if availability.status == .mobileNumberAvailabilityIncompleteRegistration,
       availability.canContinue,
       availability.hasCreationStatus
     {
@@ -137,14 +137,14 @@ final class OpaqueRegistrationService: @unchecked Sendable {
       case .otpVerified:
         _ = await secureStorageService.setRegistrationCheckpoint(.otpVerified)
         return .ok(.secureKey(membershipId: membershipId))
-      case .secureKeySet:
+      case .primaryCredentialSet:
         guard accountId != nil else {
           AppLogger.auth.warning(
-            "Registration: secureKeySet without accountId, falling back to secureKey step")
+            "Registration: primaryCredentialSet without accountId, falling back to secureKey step")
           _ = await secureStorageService.setRegistrationCheckpoint(.otpVerified)
           return .ok(.secureKey(membershipId: membershipId))
         }
-        _ = await secureStorageService.setRegistrationCheckpoint(.secureKeySet)
+        _ = await secureStorageService.setRegistrationCheckpoint(.primaryCredentialSet)
         return .ok(.pinSetup(membershipId: membershipId))
       default:
         break
@@ -225,7 +225,7 @@ final class OpaqueRegistrationService: @unchecked Sendable {
     membershipIdBytes: Data,
     secureKeyBytes: Data,
     serverPublicKey: Data,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<RegistrationCompleteOutcome, String> {
     AppLogger.auth.debug("RegistrationOPAQUE: flow start connectId=\(connectId, privacy: .public)")
     do {

@@ -47,13 +47,13 @@ final class PinSetupViewModel: Resettable {
   private let pinLength: Int = 4
   private let pinOpaqueService: PinOpaqueService
   private let secureStorageService: SecureStorageService
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   private let onPinSetupCompleted: () -> Void
 
   init(
     pinOpaqueService: PinOpaqueService,
     secureStorageService: SecureStorageService,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32,
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId,
     onPinSetupCompleted: @escaping () -> Void = {}
   ) {
     self.pinOpaqueService = pinOpaqueService
@@ -119,7 +119,7 @@ final class PinSetupViewModel: Resettable {
       isConfirmStep = false
       return
     }
-    _ = await secureStorageService.setRegistrationCheckpoint(.pinSet)
+    _ = await secureStorageService.setRegistrationCheckpoint(.pinCredentialSet)
     AppLogger.auth.info("PinSetup: PIN set successfully")
     onPinSetupCompleted()
   }
