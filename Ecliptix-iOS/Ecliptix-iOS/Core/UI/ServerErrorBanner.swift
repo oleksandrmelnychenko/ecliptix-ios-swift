@@ -33,7 +33,7 @@ struct ServerErrorBanner: View {
       )
       .accessibilityElement(children: .combine)
       .accessibilityLabel(Text("Error: \(message)"))
-      .transition(.opacity.combined(with: .move(edge: .top)))
+      .transition(.opacity)
     }
   }
 }

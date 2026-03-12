@@ -9,7 +9,7 @@ extension AppCoordinator {
   func applyStartupDecision(_ decision: StartupFlowDecision) {
     switch decision {
     case .welcome:
-      navigateToWelcome()
+      navigateToWelcome(clearStartupNotice: startupNotice == nil)
     case .main(let accountId, let membershipId):
       navigateToMain(accountId: accountId, membershipId: membershipId)
     case .pendingRegistration(let route):
@@ -20,16 +20,19 @@ extension AppCoordinator {
   }
 
   func navigateToSignIn() {
+    startupNotice = nil
     currentScreen = .signIn
     navigationPath.removeAll()
   }
 
   func navigateToRegistration() {
+    startupNotice = nil
     currentScreen = .registration
     navigationPath.removeAll()
   }
 
   func navigateToMain(accountId: UUID, membershipId: UUID) {
+    startupNotice = nil
     navigationPath.removeAll()
     clearViewModelCache()
     guard dependencies.activateAccountDatabase(accountId: accountId) else {
@@ -50,7 +53,10 @@ extension AppCoordinator {
     }
   }
 
-  func navigateToWelcome() {
+  func navigateToWelcome(clearStartupNotice: Bool = true) {
+    if clearStartupNotice {
+      startupNotice = nil
+    }
     currentScreen = .welcome
     navigationPath.removeAll()
     clearViewModelCache()
@@ -112,6 +118,7 @@ extension AppCoordinator {
   }
 
   func presentPendingRegistration(_ route: PendingRegistrationRoute) {
+    startupNotice = nil
     currentScreen = .registration
     navigationPath.removeAll()
     switch route {

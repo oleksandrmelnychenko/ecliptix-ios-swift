@@ -4,6 +4,30 @@ import Foundation
 
 enum NetworkErrorClassifier {
 
+  enum ConnectivityIssueKind {
+    case noInternet
+    case serverUnavailable
+  }
+
+  private static let offlineMarkers = [
+    "no internet",
+    "not connected",
+    "offline",
+    "network unavailable",
+    "network connection lost",
+  ]
+
+  private static let serverUnavailableMarkers = [
+    "timeout",
+    "timed out",
+    "network",
+    "unreachable",
+    "refused",
+    "cannot reach server",
+    "server unavailable",
+    "connection",
+  ]
+
   private static let connectivityMarkers = [
     "no internet",
     "not connected",
@@ -35,8 +59,21 @@ enum NetworkErrorClassifier {
   ]
 
   static func isConnectivityIssue(_ message: String) -> Bool {
+    classifyConnectivityIssue(message) != nil
+  }
+
+  static func classifyConnectivityIssue(_ message: String) -> ConnectivityIssueKind? {
     let normalized = message.lowercased()
-    return connectivityMarkers.contains { normalized.contains($0) }
+    if offlineMarkers.contains(where: normalized.contains) {
+      return .noInternet
+    }
+    if serverUnavailableMarkers.contains(where: normalized.contains) {
+      return .serverUnavailable
+    }
+    if connectivityMarkers.contains(where: normalized.contains) {
+      return .serverUnavailable
+    }
+    return nil
   }
 
   static func shouldRetrySecureUnary(_ message: String) -> Bool {

@@ -33,6 +33,7 @@ struct PinSetupView: View {
       hiddenInput
     }
     .onAppear { isInputFocused = true }
+    .ignoresSafeArea(.keyboard, edges: .bottom)
     .navigationBarBackButtonHidden(onBack != nil || viewModel.isBusy || viewModel.isConfirmStep)
     .toolbar {
       if let onBack, !viewModel.isBusy, !viewModel.isConfirmStep {
@@ -88,19 +89,23 @@ struct PinSetupView: View {
 
   @ViewBuilder
   private var errorSection: some View {
-    if viewModel.hasPinError {
-      HStack(spacing: 6) {
-        Image(systemName: "exclamationmark.circle.fill")
-          .foregroundColor(.ecliptixDanger)
-          .accessibilityHidden(true)
-        Text(viewModel.pinError)
-          .font(.geistFootnote)
-          .foregroundColor(.ecliptixDanger)
+    VStack(spacing: 0) {
+      if viewModel.hasPinError {
+        HStack(spacing: 6) {
+          Image(systemName: "exclamationmark.circle.fill")
+            .foregroundColor(.ecliptixDanger)
+            .accessibilityHidden(true)
+          Text(viewModel.pinError)
+            .font(.geistFootnote)
+            .foregroundColor(.ecliptixDanger)
+        }
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 16)
+        .transition(.opacity)
       }
-      .multilineTextAlignment(.center)
-      .padding(.horizontal, 16)
-      .transition(.opacity.combined(with: .move(edge: .top)))
     }
+    .frame(maxWidth: .infinity, minHeight: 24, alignment: .top)
+    .animation(.ecliptixSnappy, value: viewModel.hasPinError)
   }
 
   private var actionButton: some View {

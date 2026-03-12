@@ -20,11 +20,19 @@ struct MobileVerificationView: View {
     }
     .navigationTitle(viewModel.title)
     .navigationBarTitleDisplayMode(.inline)
+    .navigationBarBackButtonHidden(onBack != nil || viewModel.isSendingCode)
+    .ignoresSafeArea(.keyboard, edges: .bottom)
     .toolbar {
-      if viewModel.flowContext == .registration, let onBack {
+      if viewModel.flowContext == .registration, let onBack, !viewModel.isSendingCode {
         ToolbarItem(placement: .navigationBarLeading) {
           Button(action: onBack) {
-            Label("Back", systemImage: "chevron.left")
+            HStack(spacing: 4) {
+              Image(systemName: "chevron.left")
+                .font(.geist(.semiBold, size: 16))
+              Text("Back")
+                .font(.geist(.medium, size: 16))
+            }
+            .foregroundColor(.ecliptixAccent)
           }
         }
       }
@@ -39,7 +47,7 @@ struct MobileVerificationView: View {
           .frame(height: 32)
         titleSection
         phoneInputSection
-        ServerErrorBanner(message: viewModel.userFacingError)
+        serverErrorSection
         continueButton
         if viewModel.flowContext == .registration {
           termsSection
@@ -47,7 +55,6 @@ struct MobileVerificationView: View {
         Spacer()
       }
       .padding(.horizontal, 24)
-      .animation(.ecliptixSnappy, value: viewModel.hasError)
     }
     .disabled(viewModel.isSendingCode)
   }
@@ -131,6 +138,20 @@ struct MobileVerificationView: View {
     .animation(.ecliptixSnappy, value: viewModel.isFormValid)
     .disabled(!viewModel.isFormValid || viewModel.isSendingCode)
     .accessibilityLabel(viewModel.isSendingCode ? Text("Sending code") : Text(viewModel.buttonText))
+  }
+
+  private var serverErrorSection: some View {
+    VStack(spacing: 0) {
+      if !viewModel.userFacingError.isEmpty {
+        ServerErrorBanner(message: viewModel.userFacingError)
+      }
+    }
+    .frame(
+      maxWidth: .infinity,
+      minHeight: viewModel.flowContext == .registration ? 48 : 0,
+      alignment: .top
+    )
+    .animation(.ecliptixSnappy, value: viewModel.userFacingError)
   }
 
   private var termsSection: some View {

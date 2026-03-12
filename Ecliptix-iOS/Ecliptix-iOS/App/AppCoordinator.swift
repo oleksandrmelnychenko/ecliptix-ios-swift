@@ -13,6 +13,7 @@ final class AppCoordinator {
   var currentScreen: AppScreen = .splash
   var navigationPath: [NavigationDestination] = []
   var isStartupInProgress: Bool = false
+  var startupNotice: StartupNotice?
   let dependencies: any AppCoordinatorDependencyProviding
   private(set) var accountSettingsViewModel: AccountSettingsViewModel
   private var viewModelCache: [String: AnyObject] = [:]
@@ -45,16 +46,50 @@ final class AppCoordinator {
     defer { isStartupInProgress = false }
 
     currentScreen = .splash
+    let initializationResult = await dependencies.applicationInitializer.initialize(
+      defaultCulture: settings.culture
+    )
+    startupNotice = startupNotice(for: initializationResult)
     let decision = dependencies.appFlowResolver.resolveStartupDecision(
-      initializationResult: await dependencies.applicationInitializer.initialize(
-        defaultCulture: settings.culture
-      ),
+      initializationResult: initializationResult,
       applicationState: dependencies.applicationStateManager.currentState,
       settings: dependencies.currentAppSettings(),
       storedIdentity: dependencies.resolveStoredIdentity()
     )
     applyStartupDecision(decision)
   }
+
+  func dismissStartupNotice() {
+    startupNotice = nil
+  }
+
+  private func startupNotice(
+    for initializationResult: ApplicationInitializationResult
+  ) -> StartupNotice? {
+    switch initializationResult {
+    case .success, .settingsInitializationFailed:
+      return nil
+    case .secrecyChannelFailed(let details), .deviceRegistrationFailed(let details):
+      guard let issueKind = NetworkErrorClassifier.classifyConnectivityIssue(details) else {
+        return nil
+      }
+      return StartupNotice(
+        kind: issueKind == .noInternet ? .noInternet : .serverUnavailable,
+        message: AppErrorMessages.startupConnectionIssue
+      )
+    }
+  }
+}
+
+struct StartupNotice: Equatable {
+
+  enum Kind: Equatable {
+    case noInternet
+    case serverUnavailable
+  }
+
+  let kind: Kind
+  let message: String
 }
 
 enum AppScreen: Equatable {

@@ -15,6 +15,7 @@ struct WelcomeView: View {
   @State private var detectedLanguage: SupportedLanguage?
   @State private var selectedLanguage: SupportedLanguage = .english
   @State private var reachability = ReachabilityService()
+  @State private var startupNoticeDismissTask: Task<Void, Never>?
   private var slides: [(title: String, description: String)] {
     [
       (
@@ -92,6 +93,20 @@ struct WelcomeView: View {
           .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .topTrailing)))
           .zIndex(10)
       }
+      startupNoticePopup
+    }
+    .onAppear {
+      if shouldAutoDismissStartupNotice {
+        scheduleStartupNoticeDismiss()
+      }
+    }
+    .onDisappear {
+      startupNoticeDismissTask?.cancel()
+    }
+    .onChange(of: coordinator.startupNotice) { _, notice in
+      startupNoticeDismissTask?.cancel()
+      guard shouldAutoDismissStartupNotice, notice != nil else { return }
+      scheduleStartupNoticeDismiss()
     }
     .task {
       while !Task.isCancelled {
@@ -107,7 +122,14 @@ struct WelcomeView: View {
       for await state in reachability.observeConnectivity() {
         switch state {
         case .connected:
+          let wasOffline = !isOnline
           isOnline = true
+          if wasOffline, coordinator.startupNotice?.kind == .noInternet {
+            startupNoticeDismissTask?.cancel()
+            withAnimation(.ecliptixSnappy) {
+              coordinator.dismissStartupNotice()
+            }
+          }
         case .disconnected:
           isOnline = false
         default:
@@ -158,6 +180,58 @@ struct WelcomeView: View {
       networkBadge
       Spacer()
       languageButton
+    }
+  }
+
+  @ViewBuilder
+  private var startupNoticePopup: some View {
+    if let notice = coordinator.startupNotice {
+      StartupConnectivityCard(
+        title: startupNoticeTitle(for: notice),
+        message: notice.message,
+        isRetrying: coordinator.isStartupInProgress,
+        onRetry: {
+          Task {
+            await coordinator.startup(settings: coordinator.dependencies.settings)
+          }
+        },
+        onDismiss: {
+          withAnimation(.ecliptixSnappy) {
+            coordinator.dismissStartupNotice()
+          }
+        }
+      )
+      .padding(.top, 58)
+      .padding(.horizontal, 20)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+      .transition(.move(edge: .top).combined(with: .opacity))
+      .zIndex(6)
+    }
+  }
+
+  private func startupNoticeTitle(for notice: StartupNotice) -> String {
+    switch notice.kind {
+    case .noInternet:
+      return String(localized: "No internet connection")
+    case .serverUnavailable:
+      return String(localized: "Server unavailable")
+    }
+  }
+
+  private var shouldAutoDismissStartupNotice: Bool {
+    coordinator.startupNotice?.kind == .serverUnavailable
+  }
+
+  private func scheduleStartupNoticeDismiss() {
+    startupNoticeDismissTask?.cancel()
+    startupNoticeDismissTask = Task {
+      try? await Task.sleep(for: .seconds(4.5))
+      guard !Task.isCancelled else { return }
+      await MainActor.run {
+        withAnimation(.ecliptixSnappy) {
+          coordinator.dismissStartupNotice()
+        }
+      }
     }
   }
 
@@ -716,5 +790,80 @@ struct LanguageSuggestionSheet: View {
     case .ukrainian: "Ukraine"
     case .english: "the United States"
     }
+  }
+}
+
+struct StartupConnectivityCard: View {
+
+  let title: String
+  let message: String
+  let isRetrying: Bool
+  let onRetry: () -> Void
+  let onDismiss: () -> Void
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 14) {
+      HStack(alignment: .top, spacing: 12) {
+        Image(systemName: "wifi.exclamationmark")
+          .font(.geist(.semiBold, size: 16))
+          .foregroundColor(.ecliptixWarning)
+          .frame(width: 28, height: 28)
+          .background(Color.ecliptixWarning.opacity(0.12), in: Circle())
+          .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 4) {
+          Text(title)
+            .font(.geist(.semiBold, size: 14))
+            .foregroundColor(.ecliptixPrimaryText)
+          Text(message)
+            .font(.geist(.regular, size: 12))
+            .foregroundColor(.ecliptixSecondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        Spacer()
+        Button(action: onDismiss) {
+          Image(systemName: "xmark")
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundColor(.ecliptixSecondaryText)
+            .frame(width: 28, height: 28)
+            .background(Color.ecliptixSecondaryButton, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("Dismiss"))
+      }
+
+      Button(action: onRetry) {
+        HStack(spacing: 8) {
+          if isRetrying {
+            ProgressView()
+              .progressViewStyle(CircularProgressViewStyle(tint: .ecliptixPrimaryButtonText))
+              .scaleEffect(0.8)
+          }
+          Text(isRetrying ? String(localized: "Retrying...") : String(localized: "Retry"))
+            .font(.geist(.medium, size: 14))
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 42)
+        .foregroundColor(.ecliptixPrimaryButtonText)
+        .background(
+          LinearGradient(
+            colors: [.ecliptixPrimaryButtonGradientStart, .ecliptixPrimaryButtonGradientEnd],
+            startPoint: .leading,
+            endPoint: .trailing
+          )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+      }
+      .buttonStyle(.plain)
+      .disabled(isRetrying)
+      .opacity(isRetrying ? 0.7 : 1)
+    }
+    .padding(14)
+    .background(Color.ecliptixSurfaceElevated.opacity(0.92))
+    .clipShape(RoundedRectangle(cornerRadius: 16))
+    .overlay(
+      RoundedRectangle(cornerRadius: 16)
+        .stroke(Color.ecliptixMutedStroke, lineWidth: 0.5)
+    )
+    .shadow(color: .black.opacity(0.12), radius: 16, y: 6)
   }
 }

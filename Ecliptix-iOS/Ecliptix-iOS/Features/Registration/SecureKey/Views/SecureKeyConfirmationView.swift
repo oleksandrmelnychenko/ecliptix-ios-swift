@@ -78,12 +78,7 @@ struct SecureKeyConfirmationView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
           }
-          if viewModel.hasServerError {
-            Text(viewModel.serverError)
-              .font(.geistFootnote)
-              .foregroundColor(.ecliptixDanger)
-              .frame(maxWidth: .infinity, alignment: .leading)
-          }
+          serverErrorSection
           Button(action: {
             UIApplication.shared.sendAction(
               #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -111,6 +106,7 @@ struct SecureKeyConfirmationView: View {
         .padding(24)
       }
     }
+    .ignoresSafeArea(.keyboard, edges: .bottom)
     .navigationBarBackButtonHidden(onBack != nil || viewModel.isBusy)
     .toolbar {
       if let onBack, !viewModel.isBusy {
@@ -127,6 +123,19 @@ struct SecureKeyConfirmationView: View {
         }
       }
     }
+  }
+
+  private var serverErrorSection: some View {
+    VStack(spacing: 0) {
+      if viewModel.hasServerError {
+        Text(viewModel.serverError)
+          .font(.geistFootnote)
+          .foregroundColor(.ecliptixDanger)
+          .frame(maxWidth: .infinity, alignment: .leading)
+      }
+    }
+    .frame(maxWidth: .infinity, minHeight: 22, alignment: .topLeading)
+    .animation(.ecliptixSnappy, value: viewModel.serverError)
   }
 }
 
