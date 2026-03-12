@@ -76,14 +76,14 @@ struct SettingsView: View {
           VStack(alignment: .leading, spacing: 4) {
             Text(
               accountViewModel.displayName.isEmpty
-                ? String(localized: "User Name")
+                ? String(localized: "Display Name")
                 : accountViewModel.displayName
             )
             .font(.geist(.semiBold, size: 17))
             Text(
-              accountViewModel.profileName.isEmpty
-                ? "@username"
-                : "@\(accountViewModel.profileName)"
+              accountViewModel.handle.isEmpty
+                ? "@handle"
+                : "@\(accountViewModel.handle)"
             )
             .font(.geistFootnote)
             .foregroundColor(.secondary)

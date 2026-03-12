@@ -142,10 +142,7 @@ enum RootViewBuilder {
           onPinSetupCompleted: { [coordinator] in
             switch context {
             case .registration:
-              coordinator.continueToCompleteProfile(
-                sessionId: sessionId,
-                mobileNumber: mobileNumber
-              )
+              coordinator.completeRegistrationFromStoredState()
             case .signIn:
               coordinator.completeSignInAfterPin()
             case .secureKeyRecovery:
@@ -162,6 +159,13 @@ enum RootViewBuilder {
         viewModel: coordinator.dependencies.makePinEntryViewModel(
           onPinVerified: { [coordinator] in
             coordinator.completeSignInAfterPin()
+          },
+          onPinSetupRequired: { [coordinator] in
+            coordinator.continueToPinSetup(
+              sessionId: "",
+              mobileNumber: "",
+              context: .signIn
+            )
           }
         )
       )

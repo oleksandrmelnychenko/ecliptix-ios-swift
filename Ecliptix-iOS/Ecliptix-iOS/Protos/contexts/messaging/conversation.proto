@@ -63,7 +63,7 @@ message ConversationMember {
   bytes account_id = 2;
   ParticipantRole role = 3;
   string display_name = 4;
-  string profile_name = 5;
+  string handle = 5;
   optional string avatar_url = 6;
   google.protobuf.Timestamp joined_at = 7;
 }

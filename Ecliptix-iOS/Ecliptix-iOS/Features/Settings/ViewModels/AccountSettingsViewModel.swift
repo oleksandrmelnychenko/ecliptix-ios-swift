@@ -15,7 +15,7 @@ final class AccountSettingsViewModel {
     }
   }
 
-  var profileName: String = ""
+  var handle: String = ""
   var mobileNumber: String = ""
   var profileInitials: String = "?"
   var isLoading: Bool = false
@@ -27,9 +27,9 @@ final class AccountSettingsViewModel {
   var hasDisplayNameError: Bool { !displayNameError.isEmpty }
   private let profileService: ProfileRpcService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   private var accountId: UUID?
-  private var connectId: UInt32 = 0
+  private var connectId: ConnectId = 0
   private var isInternalUpdate = false
   private var saveTask: Task<Void, Never>?
   private var confirmationDismissTask: Task<Void, Never>?
@@ -38,7 +38,7 @@ final class AccountSettingsViewModel {
   init(
     profileService: ProfileRpcService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId
   ) {
     self.profileService = profileService
     self.settingsProvider = settingsProvider
@@ -73,7 +73,7 @@ final class AccountSettingsViewModel {
     case .ok(let profile):
       isInternalUpdate = true
       if let profile {
-        profileName = profile.profileName
+        handle = profile.handle
         displayName = profile.displayName
       }
       isInternalUpdate = false
@@ -86,7 +86,7 @@ final class AccountSettingsViewModel {
   }
 
   func saveDisplayName() async {
-    guard let accountId, !profileName.isEmpty, !displayName.isEmpty,
+    guard let accountId, !handle.isEmpty, !displayName.isEmpty,
       displayNameError.isEmpty
     else { return }
     isSaving = true
@@ -94,7 +94,7 @@ final class AccountSettingsViewModel {
 
     let result = await profileService.profileUpsert(
       accountId: accountId,
-      profileName: profileName,
+      handle: handle,
       displayName: displayName,
       connectId: connectId
     )

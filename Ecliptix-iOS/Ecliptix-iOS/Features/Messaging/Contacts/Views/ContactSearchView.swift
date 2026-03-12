@@ -37,6 +37,11 @@ struct ContactSearchView: View {
     .navigationTitle(String(localized: "Search Contacts"))
     .navigationBarTitleDisplayMode(.inline)
     .searchable(
-      text: $viewModel.searchQuery, prompt: String(localized: "Search by name or username"))
+      text: $viewModel.searchQuery, prompt: String(localized: "Search by name or handle"))
+    .alert(String(localized: "Error"), isPresented: $viewModel.hasError) {
+      Button(String(localized: "OK"), role: .cancel) {}
+    } message: {
+      Text(viewModel.errorMessage)
+    }
   }
 }

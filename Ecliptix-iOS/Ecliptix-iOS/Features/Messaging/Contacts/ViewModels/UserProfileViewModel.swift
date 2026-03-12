@@ -5,29 +5,44 @@ import Foundation
 import os
 
 @Observable @MainActor
-final class UserProfileViewModel: Resettable {
+final class ProfileViewModel: Resettable {
 
   var displayName: String = ""
-  var profileName: String = ""
+  var handle: String = ""
   var avatarUrl: String?
   var isLoading: Bool = false
   var isBlocked: Bool = false
+  var hasError: Bool = false
+  var errorMessage: String = ""
 
   private let messagingService: MessagingRpcService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   let membershipId: Data
+  private var resolvedMembershipId: Data?
+
+  /// Returns the resolved membershipId from contact lookup, falling back to the init-provided id.
+  private var effectiveMembershipId: Data {
+    resolvedMembershipId ?? membershipId
+  }
+
+  private let fallbackDisplayName: String?
+  private let fallbackHandle: String?
 
   init(
     membershipId: Data,
     messagingService: MessagingRpcService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId,
+    fallbackDisplayName: String? = nil,
+    fallbackHandle: String? = nil
   ) {
     self.membershipId = membershipId
     self.messagingService = messagingService
     self.settingsProvider = settingsProvider
     self.connectIdProvider = connectIdProvider
+    self.fallbackDisplayName = fallbackDisplayName
+    self.fallbackHandle = fallbackHandle
   }
 
   func loadProfile() async {
@@ -37,37 +52,53 @@ final class UserProfileViewModel: Resettable {
     guard let currentAccountId,
       let myMembershipId = settingsProvider()?.membership?.membershipId
     else {
-      displayName = String(localized: "User")
-      profileName = String(localized: "user")
+      displayName = fallbackDisplayName ?? String(localized: "User")
+      handle = fallbackHandle ?? String(localized: "user")
       return
     }
 
     let connectId = connectIdProvider(.dataCenterEphemeralConnect)
-    let result = await messagingService.listContacts(
-      accountId: currentAccountId,
-      membershipId: myMembershipId.protobufBytes,
-      pageSize: 200,
-      pageToken: "",
-      connectId: connectId
-    )
-    if let contact = result.ok()?.contacts.first(where: { $0.membershipID == membershipId }) {
-      displayName = contact.displayName.isEmpty ? String(localized: "User") : contact.displayName
-      profileName = contact.profileName.isEmpty ? String(localized: "user") : contact.profileName
-      avatarUrl = contact.hasAvatarURL ? contact.avatarURL : nil
-      return
+    let myMembershipIdBytes = myMembershipId.protobufBytes
+    var pageToken = ""
+
+    while true {
+      let result = await messagingService.listContacts(
+        accountId: currentAccountId,
+        membershipId: myMembershipIdBytes,
+        pageSize: 100,
+        pageToken: pageToken,
+        connectId: connectId
+      )
+      guard let response = result.ok() else { break }
+      let match = response.contacts.first(where: { $0.membershipID == membershipId })
+        ?? response.contacts.first(where: { $0.accountID == membershipId })
+      if let match {
+        resolvedMembershipId = match.membershipID
+        displayName = match.displayName.isEmpty ? String(localized: "User") : match.displayName
+        handle = match.handle.isEmpty ? String(localized: "user") : match.handle
+        avatarUrl = match.hasAvatarURL ? match.avatarURL : nil
+        isBlocked = match.relationship == .blocked
+        return
+      }
+      if response.nextPageToken.isEmpty { break }
+      pageToken = response.nextPageToken
     }
-    displayName = String(localized: "User")
-    profileName = String(localized: "user")
+    displayName = fallbackDisplayName ?? String(localized: "User")
+    handle = fallbackHandle ?? String(localized: "user")
     avatarUrl = nil
   }
 
   func createConversation() async -> Data? {
     guard let currentAccountId else {
-      AppLogger.messaging.error("UserProfile: missing accountId for createConversation")
+      hasError = true
+      errorMessage = String(localized: "Missing account information")
+      AppLogger.messaging.error("Profile: missing accountId for createConversation")
       return nil
     }
     guard let myMembershipId = settingsProvider()?.membership?.membershipId else {
-      AppLogger.messaging.error("UserProfile: no membershipId for createConversation")
+      hasError = true
+      errorMessage = String(localized: "Missing membership identity")
+      AppLogger.messaging.error("Profile: no membershipId for createConversation")
       return nil
     }
 
@@ -75,7 +106,7 @@ final class UserProfileViewModel: Resettable {
     let result = await messagingService.createDirectConversation(
       accountId: currentAccountId,
       membershipId: myMembershipId.protobufBytes,
-      recipientMembershipId: membershipId,
+      recipientMembershipId: effectiveMembershipId,
       connectId: connectId
     )
     switch result {
@@ -83,18 +114,24 @@ final class UserProfileViewModel: Resettable {
       return response.conversation.conversationID
     case .err(let error):
       AppLogger.messaging.error(
-        "UserProfile: failed to create conversation: \(error, privacy: .public)")
+        "Profile: failed to create conversation: \(error, privacy: .public)")
+      hasError = true
+      errorMessage = error.userFacingMessage
       return nil
     }
   }
 
   func toggleBlock() async {
     guard let currentAccountId else {
-      AppLogger.messaging.error("UserProfile: missing accountId for toggleBlock")
+      hasError = true
+      errorMessage = String(localized: "Missing account information")
+      AppLogger.messaging.error("Profile: missing accountId for toggleBlock")
       return
     }
     guard let myMembershipId = settingsProvider()?.membership?.membershipId else {
-      AppLogger.messaging.error("UserProfile: no membershipId for toggleBlock")
+      hasError = true
+      errorMessage = String(localized: "Missing membership identity")
+      AppLogger.messaging.error("Profile: no membershipId for toggleBlock")
       return
     }
 
@@ -103,27 +140,40 @@ final class UserProfileViewModel: Resettable {
       let result = await messagingService.unblockContact(
         accountId: currentAccountId,
         membershipId: myMembershipId.protobufBytes,
-        targetMembershipId: membershipId,
+        targetMembershipId: effectiveMembershipId,
         connectId: connectId
       )
-      if case .ok = result { isBlocked = false }
+      switch result {
+      case .ok: isBlocked = false
+      case .err(let error):
+        hasError = true
+        errorMessage = error.userFacingMessage
+      }
     } else {
       let result = await messagingService.blockContact(
         accountId: currentAccountId,
         membershipId: myMembershipId.protobufBytes,
-        targetMembershipId: membershipId,
+        targetMembershipId: effectiveMembershipId,
         connectId: connectId
       )
-      if case .ok = result { isBlocked = true }
+      switch result {
+      case .ok: isBlocked = true
+      case .err(let error):
+        hasError = true
+        errorMessage = error.userFacingMessage
+      }
     }
   }
 
   func resetState() {
     displayName = ""
-    profileName = ""
+    handle = ""
     avatarUrl = nil
     isLoading = false
     isBlocked = false
+    hasError = false
+    errorMessage = ""
+    resolvedMembershipId = nil
   }
 
   private var currentAccountId: Data? {

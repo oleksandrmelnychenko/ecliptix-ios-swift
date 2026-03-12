@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 import Foundation
 
-enum RpcServiceType: String {
+enum RpcServiceType: String, Sendable {
   case getServerPublicKeys = "GetServerPublicKeys"
   case registerAppDevice = "RegisterAppDevice"
   case establishSecrecyChannel = "EstablishSecrecyChannel"
@@ -22,7 +22,7 @@ enum RpcServiceType: String {
   case terminateSession = "TerminateSession"
   case anonymousLogout = "AnonymousLogout"
   case profileLookup = "ProfileLookup"
-  case profileNameAvailability = "ProfileNameAvailability"
+  case handleAvailability = "HandleAvailability"
   case profileUpsert = "ProfileUpsert"
   case pinRegisterInit = "PinRegisterInit"
   case pinRegisterComplete = "PinRegisterComplete"

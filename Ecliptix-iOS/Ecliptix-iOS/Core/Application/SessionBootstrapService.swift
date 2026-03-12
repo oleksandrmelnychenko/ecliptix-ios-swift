@@ -5,14 +5,14 @@ import os.log
 
 final class SessionBootstrapService {
 
-  private let bootstrapClient: any ApplicationBootstrapClient
+  private let bootstrapClient: any ApplicationBootstrapClient & SessionRecoveryCoordinating
   private let secureStorage: SecureStorageService
   private let protocolStateStorage: ProtocolStateStorage
   private let identityService: IdentityService
   private let stateManager: any ApplicationStateTransitioning
 
   init(
-    bootstrapClient: any ApplicationBootstrapClient,
+    bootstrapClient: any ApplicationBootstrapClient & SessionRecoveryCoordinating,
     secureStorage: SecureStorageService,
     protocolStateStorage: ProtocolStateStorage,
     identityService: IdentityService,
@@ -28,8 +28,8 @@ final class SessionBootstrapService {
   func ensureSecrecyChannel(
     settings: ApplicationInstanceSettings,
     isNewInstance: Bool
-  ) async -> Result<UInt32, String> {
-    let connectId: UInt32 = NetworkProvider.computeUniqueConnectId(
+  ) async -> Result<ConnectId, String> {
+    let connectId: ConnectId = NetworkProvider.computeUniqueConnectId(
       deviceId: settings.deviceId,
       appInstanceId: settings.appInstanceId,
       exchangeType: .dataCenterEphemeralConnect
@@ -55,9 +55,9 @@ final class SessionBootstrapService {
   }
 
   private func tryRestoreExistingSession(
-    connectId: UInt32,
+    connectId: ConnectId,
     settings: ApplicationInstanceSettings
-  ) async -> Result<UInt32, String>? {
+  ) async -> Result<ConnectId, String>? {
     bootstrapClient.clearConnection(connectId: connectId)
     AppLogger.security.debug(
       "Restore flow: cleared active connection for connectId=\(connectId, privacy: .public)")
@@ -104,7 +104,7 @@ final class SessionBootstrapService {
   }
 
   private func tryRestoreSessionState(
-    connectId: UInt32,
+    connectId: ConnectId,
     settings: ApplicationInstanceSettings
   ) async -> Result<Bool, String> {
     guard let accountId = settings.currentAccountId else {
@@ -222,8 +222,8 @@ final class SessionBootstrapService {
 
   private func establishNewSecrecyChannel(
     settings: ApplicationInstanceSettings,
-    connectId: UInt32
-  ) async -> Result<UInt32, String> {
+    connectId: ConnectId
+  ) async -> Result<ConnectId, String> {
     AppLogger.security.info(
       "Fresh channel flow: start connectId=\(connectId, privacy: .public), hasMembership=\((settings.membership != nil), privacy: .public), hasAccount=\((settings.currentAccountId != nil), privacy: .public)"
     )
@@ -270,12 +270,16 @@ final class SessionBootstrapService {
   }
 
   private func establishAndPersistSecrecyChannel(
-    connectId: UInt32,
+    connectId: ConnectId,
     accountId: UUID?,
     membershipId: UUID? = nil
-  ) async -> Result<UInt32, String> {
+  ) async -> Result<ConnectId, String> {
     AppLogger.app.info("Application init: establishSecrecyChannel connectId=\(connectId)")
-    let establishResult = await bootstrapClient.establishSecrecyChannel(connectId: connectId)
+    let establishResult = await bootstrapClient.coordinatedEstablishSecrecyChannel(
+      connectId: connectId,
+      exchangeType: .dataCenterEphemeralConnect,
+      prepareProtocol: {}
+    )
     guard establishResult.isOk else {
       return establishResult.propagateErr()
     }
@@ -308,20 +312,20 @@ final class SessionBootstrapService {
   }
 
   func initializeProtocolWithoutIdentity(
-    connectId: UInt32,
+    connectId: ConnectId,
     settings: ApplicationInstanceSettings
   ) async {
     AppLogger.auth.info(
       "Protocol init: initializing anonymous identity for connectId=\(connectId, privacy: .public)")
     await stateManager.transitionToAnonymous()
-    let shouldPreserveIncompleteMembership =
-      settings.currentAccountId == nil
-      && settings.membership != nil
-    if shouldPreserveIncompleteMembership {
+    let isIncompleteRegistration =
+      settings.membership != nil
+      && isCriticalRegistrationCheckpoint(settings.registrationCheckpoint)
+    if isIncompleteRegistration {
       AppLogger.auth.info(
-        "Protocol init: preserving incomplete membership for connectId=\(connectId, privacy: .public)"
+        "Protocol init: preserving incomplete registration membership for connectId=\(connectId, privacy: .public)"
       )
-    } else if settings.membership != nil {
+    } else if settings.currentAccountId == nil && settings.membership != nil {
       let clearResult = await secureStorage.setMembership(nil)
       if clearResult.isErr {
         AppLogger.auth.warning(
@@ -334,6 +338,15 @@ final class SessionBootstrapService {
       appInstanceId: settings.appInstanceId,
       connectId: connectId
     )
+  }
+
+  private func isCriticalRegistrationCheckpoint(_ checkpoint: RegistrationCheckpoint?) -> Bool {
+    switch checkpoint {
+    case .otpVerified, .primaryCredentialSet:
+      return true
+    case .pinCredentialSet, .profileCompleted, .none:
+      return false
+    }
   }
 
   func deriveSealKey(accountId: UUID?, membershipId: UUID?) async -> Result<Data, String> {
@@ -383,7 +396,7 @@ final class SessionBootstrapService {
   }
 
   private func handleRestoreFallback(
-    connectId: UInt32,
+    connectId: ConnectId,
     settings: ApplicationInstanceSettings,
     failure: String
   ) async {
@@ -409,7 +422,7 @@ final class SessionBootstrapService {
   }
 
   private func handleAuthenticatedProtocolFailure(
-    connectId: UInt32,
+    connectId: ConnectId,
     accountId: UUID,
     settings: ApplicationInstanceSettings
   ) async {
@@ -429,7 +442,7 @@ final class SessionBootstrapService {
   }
 
   func handleRevokedSession(
-    connectId: UInt32,
+    connectId: ConnectId,
     accountId: UUID?,
     membershipId: UUID
   ) async {
@@ -483,7 +496,7 @@ final class SessionBootstrapService {
     return await secureStorage.hasRevocationProof(for: membershipUUID)
   }
 
-  private func persistSessionState(connectId: UInt32, accountId: Data, sealKey: Data) async {
+  private func persistSessionState(connectId: ConnectId, accountId: Data, sealKey: Data) async {
     let externalCounter = UInt64(Date().timeIntervalSince1970 * 1000)
     _ = await bootstrapClient.persistSessionState(
       connectId: connectId,

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 import SwiftUI
 
-struct UserProfileView: View {
+struct ProfileView: View {
 
-  @State var viewModel: UserProfileViewModel
+  @State var viewModel: ProfileViewModel
   var onSendMessage: (Data) -> Void
   @State private var showBlockConfirmation = false
 
@@ -27,7 +27,7 @@ struct UserProfileView: View {
           Text(viewModel.displayName)
             .font(.geist(.semiBold, size: 22))
             .foregroundColor(.ecliptixPrimaryText)
-          Text("@\(viewModel.profileName)")
+          Text("@\(viewModel.handle)")
             .font(.geistFootnote)
             .foregroundColor(.ecliptixSecondaryText)
         }
@@ -88,6 +88,11 @@ struct UserProfileView: View {
         Task { await viewModel.toggleBlock() }
       }
       Button(String(localized: "Cancel"), role: .cancel) {}
+    }
+    .alert(String(localized: "Error"), isPresented: $viewModel.hasError) {
+      Button(String(localized: "OK"), role: .cancel) {}
+    } message: {
+      Text(viewModel.errorMessage)
     }
   }
 

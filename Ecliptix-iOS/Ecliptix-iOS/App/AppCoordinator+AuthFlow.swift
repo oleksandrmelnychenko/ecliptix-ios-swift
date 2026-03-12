@@ -19,8 +19,9 @@ extension AppCoordinator {
     navigateToMain(accountId: accountId, membershipId: membershipId)
   }
 
-  func completeSignInFromStoredState(creationStatus: SignInCreationStatus = .pinCredentialSet) {
+  func completeSignInFromStoredState(creationStatus: SignInCreationStatus = .primaryCredentialSet) {
     switch dependencies.appFlowResolver.resolveStoredSignInDecision(
+      settings: dependencies.currentAppSettings(),
       creationStatus: creationStatus,
       storedIdentity: dependencies.resolveStoredIdentity()
     ) {

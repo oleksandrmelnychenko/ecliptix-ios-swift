@@ -4,17 +4,17 @@ import Foundation
 import os.log
 
 enum ProfileStep {
-  case username
+  case handle
   case personalize
 }
 
 @Observable @MainActor
 final class CompleteProfileViewModel: Resettable {
 
-  var profileName: String = "" {
+  var handle: String = "" {
     didSet {
       if hasError { clearServerError() }
-      validateProfileNameLocally(profileName)
+      validateHandleLocally(handle)
       scheduleAvailabilityCheck()
     }
   }
@@ -26,7 +26,7 @@ final class CompleteProfileViewModel: Resettable {
     }
   }
 
-  var profileNameError: String = ""
+  var handleError: String = ""
   var displayNameError: String = ""
   var isBusy: Bool = false
   var hasError: Bool = false
@@ -34,58 +34,58 @@ final class CompleteProfileViewModel: Resettable {
   var showImagePicker: Bool = false
   var selectedAvatarData: Data? = nil
   var isCheckingAvailability: Bool = false
-  var profileNameAvailable: Bool? = nil
-  var currentStep: ProfileStep = .username
+  var handleAvailable: Bool? = nil
+  var currentStep: ProfileStep = .handle
   var userFacingError: String {
     guard hasError else { return "" }
     return ServerErrorMapper.userFacingMessage(errorMessage)
   }
 
-  var hasProfileNameError: Bool { !profileNameError.isEmpty }
+  var hasHandleError: Bool { !handleError.isEmpty }
   var hasDisplayNameError: Bool { !displayNameError.isEmpty }
   var isCompletingProfile: Bool { isBusy }
-  var profileNameValidationError: String { profileNameError }
+  var handleValidationError: String { handleError }
   var displayNameValidationError: String { displayNameError }
   var isFormValid: Bool {
     switch currentStep {
-    case .username: canProceedToPersonalize
+    case .handle: canProceedToPersonalize
     case .personalize: canComplete
     }
   }
 
-  var isProfileNameAvailable: Bool { profileNameAvailable == true && profileNameError.isEmpty }
+  var isHandleAvailable: Bool { handleAvailable == true && handleError.isEmpty }
   var stepBadgeText: String {
     switch currentStep {
-    case .username: String(localized: "Step 5 of 6")
+    case .handle: String(localized: "Step 5 of 6")
     case .personalize: String(localized: "Step 6 of 6")
     }
   }
 
   var title: String {
     switch currentStep {
-    case .username: String(localized: "Choose Your Username")
+    case .handle: String(localized: "Choose Your Handle")
     case .personalize: String(localized: "Personalize Your Profile")
     }
   }
 
   var subtitle: String {
     switch currentStep {
-    case .username: String(localized: "Your unique @handle on Ecliptix")
+    case .handle: String(localized: "Your unique @handle on Ecliptix")
     case .personalize: String(localized: "Add a photo and display name")
     }
   }
 
   var buttonText: String {
     switch currentStep {
-    case .username: String(localized: "Continue")
+    case .handle: String(localized: "Continue")
     case .personalize: String(localized: "Complete Registration")
     }
   }
 
   var showSkipButton: Bool { currentStep == .personalize }
   var canProceedToPersonalize: Bool {
-    !isBusy && profileNameError.isEmpty
-      && !profileName.isEmpty && profileNameAvailable == true
+    !isBusy && handleError.isEmpty
+      && !handle.isEmpty && handleAvailable == true
       && !isCheckingAvailability
   }
 
@@ -97,12 +97,12 @@ final class CompleteProfileViewModel: Resettable {
   private let profileService: ProfileRpcService
   private let secureStorageService: SecureStorageService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   private let onProfileCompleted: () -> Void
   private var availabilityCheckTask: Task<Void, Never>?
   private static let availabilityDebounceMs: UInt64 = 500
-  private static let profileNameMinLength: Int = 3
-  private static let profileNameMaxLength: Int = 30
+  private static let handleMinLength: Int = 3
+  private static let handleMaxLength: Int = 30
   private static let displayNameMinLength: Int = 2
   private static let displayNameMaxLength: Int = 50
   private static let reservedNames: Set<String> = [
@@ -115,7 +115,7 @@ final class CompleteProfileViewModel: Resettable {
     profileService: ProfileRpcService,
     secureStorageService: SecureStorageService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32,
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId,
     sessionId: String? = nil,
     mobileNumber: String? = nil,
     onProfileCompleted: @escaping () -> Void = {}
@@ -134,9 +134,9 @@ final class CompleteProfileViewModel: Resettable {
     currentStep = .personalize
   }
 
-  func goBackToUsername() {
+  func goBackToHandle() {
     guard currentStep == .personalize, !isBusy else { return }
-    currentStep = .username
+    currentStep = .handle
   }
 
   func completeProfile() async {
@@ -162,7 +162,7 @@ final class CompleteProfileViewModel: Resettable {
     let result = await TransientErrorDetection.executeWithRetry {
       await profileService.profileUpsert(
         accountId: accountId,
-        profileName: profileName,
+        handle: handle,
         displayName: trimmedDisplayName,
         connectId: connectId
       )
@@ -179,7 +179,7 @@ final class CompleteProfileViewModel: Resettable {
       return
     }
     AppLogger.auth.info(
-      "CompleteProfile: profile saved for accountId=\(accountId.uuidString, privacy: .public), profileName=\(self.profileName, privacy: .public)"
+      "CompleteProfile: profile saved for accountId=\(accountId.uuidString, privacy: .public), handle=\(self.handle, privacy: .public)"
     )
     onProfileCompleted()
   }
@@ -200,92 +200,92 @@ final class CompleteProfileViewModel: Resettable {
   func resetState() {
     availabilityCheckTask?.cancel()
     availabilityCheckTask = nil
-    currentStep = .username
-    profileName = ""
+    currentStep = .handle
+    handle = ""
     displayName = ""
-    profileNameError = ""
+    handleError = ""
     displayNameError = ""
-    profileNameAvailable = nil
+    handleAvailable = nil
     isCheckingAvailability = false
     isBusy = false
   }
 
   private func scheduleAvailabilityCheck() {
     availabilityCheckTask?.cancel()
-    profileNameAvailable = nil
+    handleAvailable = nil
     isCheckingAvailability = false
-    guard !profileName.isEmpty, profileNameError.isEmpty else {
+    guard !handle.isEmpty, handleError.isEmpty else {
       return
     }
 
-    let name = profileName
+    let name = handle
     isCheckingAvailability = true
     availabilityCheckTask = Task { [weak self] in
       try? await Task.sleep(for: .milliseconds(Self.availabilityDebounceMs))
       guard !Task.isCancelled else { return }
-      guard let self, self.profileName == name else { return }
+      guard let self, self.handle == name else { return }
       let connectId = self.connectIdProvider(.dataCenterEphemeralConnect)
-      let result = await self.profileService.profileNameAvailability(
-        profileName: name,
+      let result = await self.profileService.handleAvailability(
+        handle: name,
         connectId: connectId
       )
-      guard !Task.isCancelled, self.profileName == name else { return }
+      guard !Task.isCancelled, self.handle == name else { return }
       self.isCheckingAvailability = false
       if let availability = result.ok() {
-        self.profileNameAvailable = availability.isAvailable
+        self.handleAvailable = availability.isAvailable
         if !availability.isAvailable {
-          self.profileNameError =
+          self.handleError =
             availability.reason.isEmpty
-            ? String(localized: "This profile name is already taken")
+            ? String(localized: "This handle is already taken")
             : ServerErrorMapper.userFacingMessage(availability.reason)
         }
       } else {
         AppLogger.auth.warning(
-          "CompleteProfile: profileNameAvailability check failed for '\(name, privacy: .public)', error=\(result.err()?.logDescription ?? "unknown", privacy: .public)"
+          "CompleteProfile: handleAvailability check failed for '\(name, privacy: .public)', error=\(result.err()?.logDescription ?? "unknown", privacy: .public)"
         )
-        self.profileNameAvailable = nil
+        self.handleAvailable = nil
       }
     }
   }
 
-  private func validateProfileNameLocally(_ name: String) {
-    profileNameAvailable = nil
+  private func validateHandleLocally(_ name: String) {
+    handleAvailable = nil
     if name.isEmpty {
-      profileNameError = ""
+      handleError = ""
       return
     }
-    guard name.count >= Self.profileNameMinLength else {
-      profileNameError = String(localized: "Profile name must be at least 3 characters")
+    guard name.count >= Self.handleMinLength else {
+      handleError = String(localized: "Handle must be at least 3 characters")
       return
     }
-    guard name.count <= Self.profileNameMaxLength else {
-      profileNameError = String(localized: "Profile name must be at most 30 characters")
+    guard name.count <= Self.handleMaxLength else {
+      handleError = String(localized: "Handle must be at most 30 characters")
       return
     }
 
     let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_"))
     guard name.unicodeScalars.allSatisfy({ allowed.contains($0) }) else {
-      profileNameError = String(
-        localized: "Profile name can only contain letters, numbers, and underscores")
+      handleError = String(
+        localized: "Handle can only contain letters, numbers, and underscores")
       return
     }
     guard let first = name.first, first.isLetter || first.isNumber else {
-      profileNameError = String(localized: "Profile name must start with a letter or number")
+      handleError = String(localized: "Handle must start with a letter or number")
       return
     }
     guard !name.hasSuffix("_") else {
-      profileNameError = String(localized: "Profile name must not end with an underscore")
+      handleError = String(localized: "Handle must not end with an underscore")
       return
     }
     guard !name.contains("__") else {
-      profileNameError = String(localized: "Profile name must not contain consecutive underscores")
+      handleError = String(localized: "Handle must not contain consecutive underscores")
       return
     }
     if Self.reservedNames.contains(name.lowercased()) {
-      profileNameError = String(localized: "This profile name is reserved")
+      handleError = String(localized: "This handle is reserved")
       return
     }
-    profileNameError = ""
+    handleError = ""
   }
 
   private func validateDisplayName(_ name: String) {

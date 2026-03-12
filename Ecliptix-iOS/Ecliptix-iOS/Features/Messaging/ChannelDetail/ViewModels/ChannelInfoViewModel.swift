@@ -26,13 +26,13 @@ final class ChannelInfoViewModel: Resettable {
   let channelId: Data
   private let messagingService: MessagingRpcService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
 
   init(
     channelId: Data,
     messagingService: MessagingRpcService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId
   ) {
     self.channelId = channelId
     self.messagingService = messagingService
@@ -70,7 +70,7 @@ final class ChannelInfoViewModel: Resettable {
               id: member.membershipID,
               accountId: member.accountID,
               displayName: member.displayName,
-              profileName: member.profileName,
+              handle: member.handle,
               avatarUrl: member.hasAvatarURL ? member.avatarURL : nil,
               role: role == .owner ? .owner : .admin,
               joinedAt: member.hasJoinedAt ? member.joinedAt.date : nil

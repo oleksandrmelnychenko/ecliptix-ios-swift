@@ -7,6 +7,6 @@ enum FeedNavigationDestination: Hashable {
   case createPost
   case createReply(parentPostId: Data, parentAuthorName: String)
   case createQuote(quotedPostId: Data)
-  case userProfile(membershipId: Data)
+  case profile(membershipId: Data)
   case postThread(postId: Data)
 }

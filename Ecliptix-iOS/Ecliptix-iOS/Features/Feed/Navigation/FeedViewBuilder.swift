@@ -38,9 +38,9 @@ enum FeedViewBuilder {
           onPostCreated: { path.wrappedValue.removeLast() }
         )
       )
-    case .userProfile(let membershipId):
-      UserProfileView(
-        viewModel: coordinator.dependencies.makeUserProfileViewModel(membershipId: membershipId),
+    case .profile(let membershipId):
+      ProfileView(
+        viewModel: coordinator.dependencies.makeProfileViewModel(membershipId: membershipId, fallbackDisplayName: nil, fallbackHandle: nil),
         onSendMessage: { _ in }
       )
     case .postThread(let postId):

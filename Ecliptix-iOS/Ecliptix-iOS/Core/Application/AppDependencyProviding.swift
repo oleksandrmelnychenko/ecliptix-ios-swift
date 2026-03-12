@@ -11,7 +11,7 @@ protocol AppLifecycleProviding: AnyObject {
 
   func currentAppSettings() -> ApplicationInstanceSettings?
 
-  func currentConnectId(exchangeType: PubKeyExchangeType) -> UInt32
+  func currentConnectId(exchangeType: PubKeyExchangeType) -> ConnectId
 
   func resolveStoredIdentity() -> (accountId: UUID, membershipId: UUID)?
 
@@ -48,7 +48,10 @@ protocol AuthenticationFlowBuilding: AnyObject {
   ) -> CompleteProfileViewModel
   @MainActor func makePinSetupViewModel(onPinSetupCompleted: @escaping () -> Void)
     -> PinSetupViewModel
-  @MainActor func makePinEntryViewModel(onPinVerified: @escaping () -> Void) -> PinEntryViewModel
+  @MainActor func makePinEntryViewModel(
+    onPinVerified: @escaping () -> Void,
+    onPinSetupRequired: @escaping () -> Void
+  ) -> PinEntryViewModel
   @MainActor func makeWelcomeBackViewModel(
     onContinueToSetup: @escaping (UUID, String, Data?) -> Void,
     onContinueLater: @escaping () -> Void
@@ -73,7 +76,9 @@ protocol MessagingFlowBuilding: AnyObject {
   @MainActor func makeNewGroupViewModel() -> NewGroupViewModel
   @MainActor func makeGroupCreationViewModel(memberIds: [Data]) -> GroupCreationViewModel
   @MainActor func makeContactSearchViewModel() -> ContactSearchViewModel
-  @MainActor func makeUserProfileViewModel(membershipId: Data) -> UserProfileViewModel
+  @MainActor func makeProfileViewModel(
+    membershipId: Data, fallbackDisplayName: String?, fallbackHandle: String?
+  ) -> ProfileViewModel
   @MainActor func makePhoneContactsViewModel(onContactSelected: @escaping (Data) -> Void)
     -> PhoneContactsViewModel
   @MainActor func makeChannelFeedViewModel(channelId: Data) -> ChannelFeedViewModel

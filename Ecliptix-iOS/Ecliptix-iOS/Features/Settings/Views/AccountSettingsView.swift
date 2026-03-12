@@ -89,11 +89,11 @@ struct AccountSettingsView: View {
 
   private var profileInfoSection: some View {
     Section(String(localized: "Profile")) {
-      if !viewModel.profileName.isEmpty {
+      if !viewModel.handle.isEmpty {
         HStack {
-          Label(String(localized: "Profile Name"), systemImage: "at")
+          Label(String(localized: "Handle"), systemImage: "at")
           Spacer()
-          Text(viewModel.profileName)
+          Text(viewModel.handle)
             .foregroundStyle(.secondary)
         }
       }

@@ -7,7 +7,7 @@ struct MemberDisplayItem: Identifiable, Hashable, Sendable {
   let id: Data
   let accountId: Data
   let displayName: String
-  let profileName: String
+  let handle: String
   let avatarUrl: String?
   var role: MemberRole
   let joinedAt: Date?

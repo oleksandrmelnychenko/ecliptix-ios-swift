@@ -88,8 +88,8 @@ struct CompleteProfileView: View {
   @ViewBuilder
   private var stepContent: some View {
     switch viewModel.currentStep {
-    case .username:
-      profileNameInputSection
+    case .handle:
+      handleInputSection
         .transition(
           .asymmetric(
             insertion: .move(edge: .leading).combined(with: .opacity),
@@ -108,14 +108,14 @@ struct CompleteProfileView: View {
     }
   }
 
-  private var profileNameInputSection: some View {
+  private var handleInputSection: some View {
     @Bindable var vm = viewModel
     return VStack(alignment: .leading, spacing: 4) {
       HintedTextField(
-        placeholder: "username",
-        text: $vm.profileName,
-        hint: profileNameHint,
-        error: viewModel.profileNameValidationError,
+        placeholder: "handle",
+        text: $vm.handle,
+        hint: handleHint,
+        error: viewModel.handleValidationError,
         isDisabled: viewModel.isCompletingProfile,
         prefix: "@",
         autocapitalization: .never,
@@ -130,8 +130,8 @@ struct CompleteProfileView: View {
             .foregroundColor(.ecliptixSecondaryText)
         }
         .transition(.opacity)
-      } else if viewModel.isProfileNameAvailable && !viewModel.profileName.isEmpty
-        && viewModel.profileNameValidationError.isEmpty
+      } else if viewModel.isHandleAvailable && !viewModel.handle.isEmpty
+        && viewModel.handleValidationError.isEmpty
       {
         HStack(spacing: 6) {
           Image(systemName: "checkmark.circle.fill")
@@ -145,10 +145,10 @@ struct CompleteProfileView: View {
       }
     }
     .animation(.ecliptixSnappy, value: viewModel.isCheckingAvailability)
-    .animation(.ecliptixSnappy, value: viewModel.isProfileNameAvailable)
+    .animation(.ecliptixSnappy, value: viewModel.isHandleAvailable)
   }
 
-  private var profileNameHint: String {
+  private var handleHint: String {
     "3-30 characters, letters, numbers, and underscore only"
   }
 
@@ -213,7 +213,7 @@ struct CompleteProfileView: View {
       UIApplication.shared.sendAction(
         #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
       switch viewModel.currentStep {
-      case .username:
+      case .handle:
         viewModel.proceedToPersonalize()
       case .personalize:
         Task {
@@ -259,7 +259,7 @@ struct CompleteProfileView: View {
   }
 
   private var backButton: some View {
-    Button(action: { viewModel.goBackToUsername() }) {
+    Button(action: { viewModel.goBackToHandle() }) {
       Text("Back")
         .font(.geist(.medium, size: 15))
         .foregroundColor(.ecliptixSubtleButtonText)

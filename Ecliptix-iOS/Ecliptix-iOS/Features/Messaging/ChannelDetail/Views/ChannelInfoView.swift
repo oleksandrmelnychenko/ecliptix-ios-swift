@@ -29,10 +29,15 @@ struct ChannelInfoView: View {
         ToolbarItem(placement: .topBarTrailing) {
           Button(isEditing ? String(localized: "Done") : String(localized: "Edit")) {
             if isEditing {
-              Task { await viewModel.updateSettings() }
+              Task {
+                await viewModel.updateSettings()
+                isEditing = false
+              }
+            } else {
+              isEditing = true
             }
-            isEditing.toggle()
           }
+          .disabled(viewModel.isSaving)
         }
       }
     }
@@ -110,7 +115,7 @@ struct ChannelInfoView: View {
     Section(String(localized: "Admins")) {
       ForEach(viewModel.admins) { admin in
         Button {
-          onNavigate(.userProfile(membershipId: admin.id))
+          onNavigate(.profile(membershipId: admin.id))
         } label: {
           HStack(spacing: 12) {
             ZStack {

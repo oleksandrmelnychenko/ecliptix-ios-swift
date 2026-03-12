@@ -13,16 +13,18 @@ final class ContactSearchViewModel: Resettable {
   }
 
   var isSearching = false
+  var hasError = false
+  var errorMessage = ""
 
   private let messagingService: MessagingRpcService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   private var searchTask: Task<Void, Never>?
 
   init(
     messagingService: MessagingRpcService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId
   ) {
     self.messagingService = messagingService
     self.settingsProvider = settingsProvider
@@ -34,6 +36,8 @@ final class ContactSearchViewModel: Resettable {
     contacts = []
     searchQuery = ""
     isSearching = false
+    hasError = false
+    errorMessage = ""
   }
 
   private var currentAccountId: Data? {
@@ -76,7 +80,7 @@ final class ContactSearchViewModel: Resettable {
       accountId: currentAccountId,
       membershipId: membershipId.protobufBytes,
       query: searchQuery,
-      pageSize: 30,
+      pageSize: 50,
       connectId: connectId
     )
     guard !Task.isCancelled else { return }
@@ -87,7 +91,7 @@ final class ContactSearchViewModel: Resettable {
           id: c.membershipID,
           accountId: c.accountID,
           displayName: c.displayName,
-          profileName: c.profileName,
+          handle: c.handle,
           avatarUrl: c.hasAvatarURL ? c.avatarURL : nil,
           role: .member,
           joinedAt: nil
@@ -96,6 +100,8 @@ final class ContactSearchViewModel: Resettable {
     case .err(let error):
       AppLogger.messaging.warning("ContactSearch: search failed: \(error, privacy: .public)")
       contacts = []
+      hasError = true
+      errorMessage = error.userFacingMessage
     }
   }
 }

@@ -17,13 +17,13 @@ final class NewConversationViewModel: Resettable {
 
   private let messagingService: MessagingRpcService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   private var allContacts: [MemberDisplayItem] = []
 
   init(
     messagingService: MessagingRpcService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId
   ) {
     self.messagingService = messagingService
     self.settingsProvider = settingsProvider
@@ -49,34 +49,52 @@ final class NewConversationViewModel: Resettable {
     }
 
     let connectId = connectIdProvider(.dataCenterEphemeralConnect)
-    let result = await messagingService.listContacts(
-      accountId: currentAccountId,
-      membershipId: membershipId.protobufBytes,
-      pageSize: 100,
-      pageToken: "",
-      connectId: connectId
-    )
-    switch result {
-    case .ok(let response):
-      allContacts = response.contacts.map { contact in
-        MemberDisplayItem(
-          id: contact.membershipID,
-          accountId: contact.accountID,
-          displayName: contact.displayName,
-          profileName: contact.profileName,
-          avatarUrl: contact.hasAvatarURL ? contact.avatarURL : nil,
-          role: .member,
-          joinedAt: nil
-        )
+    let membershipIdBytes = membershipId.protobufBytes
+    var accumulated: [MemberDisplayItem] = []
+    var pageToken = ""
+
+    while true {
+      let result = await messagingService.listContacts(
+        accountId: currentAccountId,
+        membershipId: membershipIdBytes,
+        pageSize: 100,
+        pageToken: pageToken,
+        connectId: connectId
+      )
+      switch result {
+      case .ok(let response):
+        accumulated.append(contentsOf: response.contacts.map { contact in
+          MemberDisplayItem(
+            id: contact.membershipID,
+            accountId: contact.accountID,
+            displayName: contact.displayName,
+            handle: contact.handle,
+            avatarUrl: contact.hasAvatarURL ? contact.avatarURL : nil,
+            role: .member,
+            joinedAt: nil
+          )
+        })
+        if response.nextPageToken.isEmpty {
+          allContacts = accumulated
+          contacts = allContacts
+          filteredContacts = allContacts
+          hasError = false
+          errorMessage = ""
+          return
+        }
+        pageToken = response.nextPageToken
+      case .err(let error):
+        AppLogger.messaging.error(
+          "NewConversation: failed to load contacts: \(error.logDescription, privacy: .public)")
+        if accumulated.isEmpty {
+          applyContactsLoadFailure(error.userFacingMessage)
+        } else {
+          allContacts = accumulated
+          contacts = allContacts
+          filteredContacts = allContacts
+        }
+        return
       }
-      contacts = allContacts
-      filteredContacts = allContacts
-      hasError = false
-      errorMessage = ""
-    case .err(let error):
-      AppLogger.messaging.error(
-        "NewConversation: failed to load contacts: \(error.logDescription, privacy: .public)")
-      applyContactsLoadFailure(error.userFacingMessage)
     }
   }
 
@@ -140,7 +158,7 @@ final class NewConversationViewModel: Resettable {
     } else {
       let query = searchQuery.lowercased()
       filteredContacts = allContacts.filter {
-        $0.displayName.lowercased().contains(query) || $0.profileName.lowercased().contains(query)
+        $0.displayName.lowercased().contains(query) || $0.handle.lowercased().contains(query)
       }
     }
   }
@@ -164,22 +182,22 @@ final class NewConversationViewModel: Resettable {
   private func loadMockContacts() {
     allContacts = [
       MemberDisplayItem(
-        id: Data([1]), accountId: Data([1]), displayName: "Alice Johnson", profileName: "alice",
+        id: Data([1]), accountId: Data([1]), displayName: "Alice Johnson", handle: "alice",
         avatarUrl: nil, role: .member, joinedAt: nil),
       MemberDisplayItem(
-        id: Data([2]), accountId: Data([2]), displayName: "Bob Smith", profileName: "bob",
+        id: Data([2]), accountId: Data([2]), displayName: "Bob Smith", handle: "bob",
         avatarUrl: nil, role: .member, joinedAt: nil),
       MemberDisplayItem(
-        id: Data([3]), accountId: Data([3]), displayName: "Carol Williams", profileName: "carol",
+        id: Data([3]), accountId: Data([3]), displayName: "Carol Williams", handle: "carol",
         avatarUrl: nil, role: .member, joinedAt: nil),
       MemberDisplayItem(
-        id: Data([4]), accountId: Data([4]), displayName: "David Brown", profileName: "david",
+        id: Data([4]), accountId: Data([4]), displayName: "David Brown", handle: "david",
         avatarUrl: nil, role: .member, joinedAt: nil),
       MemberDisplayItem(
-        id: Data([5]), accountId: Data([5]), displayName: "Eva Martinez", profileName: "eva",
+        id: Data([5]), accountId: Data([5]), displayName: "Eva Martinez", handle: "eva",
         avatarUrl: nil, role: .member, joinedAt: nil),
       MemberDisplayItem(
-        id: Data([6]), accountId: Data([6]), displayName: "Frank Lee", profileName: "frank",
+        id: Data([6]), accountId: Data([6]), displayName: "Frank Lee", handle: "frank",
         avatarUrl: nil, role: .member, joinedAt: nil),
     ]
   }

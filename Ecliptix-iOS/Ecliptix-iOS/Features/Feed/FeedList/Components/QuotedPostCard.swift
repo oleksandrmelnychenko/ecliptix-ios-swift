@@ -13,7 +13,7 @@ struct QuotedPostCard: View {
           .font(.geist(.semiBold, size: 13))
           .foregroundStyle(Color.ecliptixPrimaryText)
 
-        Text("@\(quotedPost.author.profileName)")
+        Text("@\(quotedPost.author.handle)")
           .font(.geistCaption)
           .foregroundStyle(Color.ecliptixSecondaryText)
 

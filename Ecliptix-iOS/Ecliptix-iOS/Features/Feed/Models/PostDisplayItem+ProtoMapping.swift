@@ -34,7 +34,7 @@ extension PostDisplayItem.AuthorDisplay {
       membershipId: proto.membershipID,
       accountId: proto.accountID,
       displayName: proto.displayName,
-      profileName: proto.profileName,
+      handle: proto.handle,
       avatarUrl: proto.hasAvatarURL ? proto.avatarURL : nil,
       isVerified: proto.isVerified
     )

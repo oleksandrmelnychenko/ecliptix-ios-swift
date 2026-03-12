@@ -11,7 +11,8 @@ final class ProfileRpcService {
 
   init(
     transport: EventGatewayTransport,
-    secureSessionClient: any SecureSessionClient & NetworkOutageControlling,
+    secureSessionClient: any SecureSessionClient & NetworkOutageControlling
+      & SessionRecoveryCoordinating,
     secureStorageService: SecureStorageService,
     protocolStateStorage: ProtocolStateStorage,
     identityService: IdentityService
@@ -28,8 +29,8 @@ final class ProfileRpcService {
 
   func profileLookup(
     accountId: UUID,
-    connectId: UInt32
-  ) async -> Result<AccountProfile?, RpcError> {
+    connectId: ConnectId
+  ) async -> Result<Profile?, RpcError> {
     var request = ProfileLookupRequest()
     request.currentAccountID = accountId.protobufBytes
     request.byAccountID = accountId.protobufBytes
@@ -42,8 +43,8 @@ final class ProfileRpcService {
   func profileLookupByMobile(
     mobileNumber: String,
     currentAccountId: UUID,
-    connectId: UInt32
-  ) async -> Result<AccountProfile?, RpcError> {
+    connectId: ConnectId
+  ) async -> Result<Profile?, RpcError> {
     var request = ProfileLookupRequest()
     request.currentAccountID = currentAccountId.protobufBytes
     request.byMobileNumber = mobileNumber
@@ -54,29 +55,29 @@ final class ProfileRpcService {
     return .ok(response.hasProfile ? response.profile : nil)
   }
 
-  func profileNameAvailability(
-    profileName: String,
-    connectId: UInt32
-  ) async -> Result<ProfileNameAvailabilityResult, RpcError> {
-    var request = ProfileNameAvailabilityRequest()
-    request.profileName = profileName
-    let result: Result<ProfileNameAvailabilityResponse, RpcError> = await executeTypedUnary(
-      serviceType: .profileNameAvailability, request: request, connectId: connectId,
-      label: "ProfileNameAvailability")
+  func handleAvailability(
+    handle: String,
+    connectId: ConnectId
+  ) async -> Result<HandleAvailabilityResult, RpcError> {
+    var request = HandleAvailabilityRequest()
+    request.handle = handle
+    let result: Result<HandleAvailabilityResponse, RpcError> = await executeTypedUnary(
+      serviceType: .handleAvailability, request: request, connectId: connectId,
+      label: "HandleAvailability")
     guard let response = result.ok() else { return result.propagateErr() }
     return .ok(
-      ProfileNameAvailabilityResult(isAvailable: response.isAvailable, reason: response.reason))
+      HandleAvailabilityResult(isAvailable: response.isAvailable, reason: response.reason))
   }
 
   func profileUpsert(
     accountId: UUID,
-    profileName: String,
+    handle: String,
     displayName: String,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<Unit, RpcError> {
     var request = ProfileUpsertRequest()
     request.accountID = accountId.protobufBytes
-    request.profileName = profileName
+    request.handle = handle
     request.displayName = displayName
     let result: Result<ProfileUpsertResponse, RpcError> = await executeTypedUnary(
       serviceType: .profileUpsert, request: request, connectId: connectId, label: "ProfileUpsert")
@@ -90,7 +91,7 @@ final class ProfileRpcService {
   private func executeTypedUnary<Request: SwiftProtobuf.Message, Response: SwiftProtobuf.Message>(
     serviceType: RpcServiceType,
     request: Request,
-    connectId: UInt32,
+    connectId: ConnectId,
     label: String
   ) async -> Result<Response, RpcError> {
     AppLogger.auth.info("\(label): start connectId=\(connectId, privacy: .public)")

@@ -8,7 +8,7 @@ enum MessagesNavigationDestination: Hashable {
   case newGroup
   case groupCreation(memberIds: [Data])
   case conversationInfo(conversationId: Data)
-  case userProfile(membershipId: Data)
+  case profile(membershipId: Data, displayName: String? = nil, handle: String? = nil)
   case contactSearch
   case phoneContacts
   case channelFeed(channelId: Data)

@@ -147,7 +147,7 @@ extension AppDatabase {
         t.column("leafIndex", .integer).notNull()
         t.column("role", .integer).defaults(to: 0)
         t.column("displayName", .text).notNull()
-        t.column("profileName", .text)
+        t.column("handle", .text)
         t.column("avatarUrl", .text)
         t.column("joinedAt", .integer).notNull()
         t.primaryKey(["conversationId", "deviceId"])
@@ -230,6 +230,39 @@ extension AppDatabase {
     migrator.registerMigration("v2_crypto_session_seal_counter") { db in
       try db.alter(table: "cryptoSession") { t in
         t.add(column: "sealCounter", .integer).notNull().defaults(to: 0)
+      }
+    }
+
+    migrator.registerMigration("v3_rpc_mutation_queue") { db in
+      try db.create(table: "rpcMutationQueue") { t in
+        t.autoIncrementedPrimaryKey("id")
+        t.column("serviceType", .text).notNull()
+        t.column("exchangeType", .integer).notNull()
+        t.column("dedupeKey", .text).notNull().unique()
+        t.column("conversationId", .blob)
+        t.column("clientMessageId", .text)
+        t.column("payload", .blob).notNull()
+        t.column("createdAt", .integer).notNull()
+        t.column("retryCount", .integer).defaults(to: 0)
+        t.column("lastAttemptAt", .integer)
+      }
+
+      try db.create(
+        index: "idx_rpc_mutation_queue_createdAt",
+        on: "rpcMutationQueue",
+        columns: ["createdAt"]
+      )
+      try db.create(
+        index: "idx_rpc_mutation_queue_lookup",
+        on: "rpcMutationQueue",
+        columns: ["serviceType", "conversationId", "createdAt"]
+      )
+    }
+
+    migrator.registerMigration("v4_conversation_member_handle") { db in
+      let columnNames = try db.columns(in: "conversationMember").map(\.name)
+      if columnNames.contains("profileName") && !columnNames.contains("handle") {
+        try db.execute(sql: "ALTER TABLE conversationMember RENAME COLUMN profileName TO handle")
       }
     }
 
@@ -409,7 +442,7 @@ extension AppDatabase {
     try dbPool.read { db in
       try OutboxRecord
         .filter(Column("retryCount") >= retryCountAtLeast)
-        .order(Column("lastAttemptAt").descNullsLast, Column("createdAt").asc)
+        .order(Column("lastAttemptAt").desc, Column("createdAt").asc)
         .limit(limit)
         .fetchAll(db)
     }
@@ -418,6 +451,89 @@ extension AppDatabase {
   func deleteAllOutbox() throws {
     try dbPool.write { db in
       _ = try OutboxRecord.deleteAll(db)
+    }
+  }
+
+  func enqueueRpcMutation(
+    _ record: RpcMutationQueueRecord,
+    retryCountThreshold: Int
+  ) throws -> Bool {
+    try dbPool.write { db in
+      if var existing = try RpcMutationQueueRecord
+        .filter(Column("dedupeKey") == record.dedupeKey)
+        .fetchOne(db)
+      {
+        guard existing.retryCount >= retryCountThreshold else { return false }
+
+        existing.serviceType = record.serviceType
+        existing.exchangeType = record.exchangeType
+        existing.payload = record.payload
+        existing.createdAt = record.createdAt
+        existing.retryCount = 0
+        existing.lastAttemptAt = nil
+        try existing.update(db)
+        return true
+      }
+
+      var mutable = record
+      try mutable.insert(db)
+      return true
+    }
+  }
+
+  func fetchRetriableRpcMutations(retryCountBelow: Int) throws -> [RpcMutationQueueRecord] {
+    try dbPool.read { db in
+      try RpcMutationQueueRecord
+        .filter(Column("retryCount") < retryCountBelow)
+        .order(Column("createdAt").asc)
+        .fetchAll(db)
+    }
+  }
+
+  func countRetriableRpcMutations(retryCountBelow: Int) throws -> Int {
+    try dbPool.read { db in
+      try RpcMutationQueueRecord
+        .filter(Column("retryCount") < retryCountBelow)
+        .fetchCount(db)
+    }
+  }
+
+  func fetchQueuedRpcMutations(
+    serviceType: String,
+    conversationId: Data
+  ) throws -> [RpcMutationQueueRecord] {
+    try dbPool.read { db in
+      try RpcMutationQueueRecord
+        .filter(Column("serviceType") == serviceType)
+        .filter(Column("conversationId") == conversationId)
+        .order(Column("createdAt").asc)
+        .fetchAll(db)
+    }
+  }
+
+  func deleteRpcMutation(id: Int64) throws {
+    try dbPool.write { db in
+      _ = try RpcMutationQueueRecord.deleteOne(db, key: id)
+    }
+  }
+
+  func incrementRpcMutationRetry(id: Int64) throws {
+    try dbPool.write { db in
+      if var entry = try RpcMutationQueueRecord.fetchOne(db, key: id) {
+        entry.retryCount += 1
+        entry.lastAttemptAt = Int64(Date().timeIntervalSince1970)
+        try entry.update(db)
+      }
+    }
+  }
+
+  func quarantineRpcMutation(id: Int64, retryCount: Int) throws {
+    try dbPool.write { db in
+      if var entry = try RpcMutationQueueRecord.fetchOne(db, key: id) {
+        entry.retryCount = retryCount
+        entry.lastAttemptAt = Int64(Date().timeIntervalSince1970)
+        try entry.update(db)
+      }
     }
   }
 }

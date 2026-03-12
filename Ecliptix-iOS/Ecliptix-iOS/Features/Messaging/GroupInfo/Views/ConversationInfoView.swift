@@ -71,7 +71,11 @@ struct ConversationInfoView: View {
               member: member,
               isAdmin: viewModel.isAdmin,
               onTap: {
-                onNavigate(.userProfile(membershipId: member.id))
+                onNavigate(.profile(
+                  membershipId: member.id,
+                  displayName: member.displayName,
+                  handle: member.handle
+                ))
               },
               onRemove: viewModel.isAdmin
                 ? {
@@ -102,6 +106,14 @@ struct ConversationInfoView: View {
     )
     .navigationBarTitleDisplayMode(.inline)
     .task { await viewModel.loadInfo() }
+    .alert(String(localized: "Error"), isPresented: .init(
+      get: { viewModel.hasError },
+      set: { if !$0 { viewModel.hasError = false } }
+    )) {
+      Button(String(localized: "OK"), role: .cancel) {}
+    } message: {
+      Text(viewModel.errorMessage)
+    }
     .onChange(of: viewModel.didLeaveGroup) {
       if viewModel.didLeaveGroup {
         dismiss()

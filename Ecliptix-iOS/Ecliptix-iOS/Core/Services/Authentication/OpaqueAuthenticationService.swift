@@ -205,13 +205,14 @@ final class OpaqueAuthenticationService: @unchecked Sendable {
         switch finalizeResponse.membership.creationStatus {
         case .primaryCredentialSet:
           creationStatus = .primaryCredentialSet
-        case .pinCredentialSet:
-          creationStatus = .pinCredentialSet
         default:
-          creationStatus = .pinCredentialSet
+          AppLogger.auth.warning(
+            "OpaqueSignIn: unexpected creation status \(finalizeResponse.membership.creationStatus.rawValue, privacy: .public), defaulting to primaryCredentialSet"
+          )
+          creationStatus = .primaryCredentialSet
         }
       } else {
-        creationStatus = .pinCredentialSet
+        creationStatus = .primaryCredentialSet
       }
 
       let membership = Membership(
@@ -219,16 +220,12 @@ final class OpaqueAuthenticationService: @unchecked Sendable {
         mobileNumber: mobileNumber
       )
       let checkpoint: RegistrationCheckpoint
-      if creationStatus == .primaryCredentialSet {
-        let currentCheckpoint = secureStorageService.settings?.registrationCheckpoint
-        switch currentCheckpoint {
-        case .pinCredentialSet, .profileCompleted:
-          checkpoint = currentCheckpoint!
-        default:
-          checkpoint = .primaryCredentialSet
-        }
-      } else {
-        checkpoint = .profileCompleted
+      let currentCheckpoint = secureStorageService.settings?.registrationCheckpoint
+      switch currentCheckpoint {
+      case .pinCredentialSet, .profileCompleted:
+        checkpoint = currentCheckpoint!
+      default:
+        checkpoint = .primaryCredentialSet
       }
       let persistStateResult = await secureStorageService.setRegistrationState(
         membership: membership,
@@ -398,7 +395,6 @@ extension OpaqueAuthenticationService {
 
 enum SignInCreationStatus {
   case primaryCredentialSet
-  case pinCredentialSet
 }
 
 struct SignInOutcome {

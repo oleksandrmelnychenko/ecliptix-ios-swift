@@ -53,9 +53,13 @@ enum MessagesViewBuilder {
           conversationId: conversationId),
         onNavigate: { dest in path.wrappedValue.append(dest) }
       )
-    case .userProfile(let membershipId):
-      UserProfileView(
-        viewModel: coordinator.dependencies.makeUserProfileViewModel(membershipId: membershipId),
+    case .profile(let membershipId, let displayName, let handle):
+      ProfileView(
+        viewModel: coordinator.dependencies.makeProfileViewModel(
+          membershipId: membershipId,
+          fallbackDisplayName: displayName,
+          fallbackHandle: handle
+        ),
         onSendMessage: { conversationId in
           path.wrappedValue = [.chatDetail(conversationId: conversationId)]
         }
@@ -71,7 +75,7 @@ enum MessagesViewBuilder {
       PhoneContactsView(
         viewModel: coordinator.dependencies.makePhoneContactsViewModel(
           onContactSelected: { membershipId in
-            path.wrappedValue.append(.userProfile(membershipId: membershipId))
+            path.wrappedValue.append(.profile(membershipId: membershipId))
           }
         )
       )
@@ -100,6 +104,7 @@ enum MessagesViewBuilder {
             conversationId: conversationId)
           Task {
             await vm.addMembers(memberIds)
+            guard !vm.hasError else { return }
             path.wrappedValue.removeLast()
           }
         }

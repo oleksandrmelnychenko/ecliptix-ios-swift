@@ -19,7 +19,7 @@ message Contact {
   bytes membership_id = 1;
   bytes account_id = 2;
   string display_name = 3;
-  string profile_name = 4;
+  string handle = 4;
   optional string avatar_url = 5;
   ContactRelationship relationship = 6;
   google.protobuf.Timestamp added_at = 7;

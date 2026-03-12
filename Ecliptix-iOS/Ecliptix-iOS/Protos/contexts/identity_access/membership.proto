@@ -22,7 +22,7 @@ message Membership {
     CREATION_STATUS_UNSPECIFIED = 0;
     CREATION_STATUS_OTP_VERIFIED = 1;
     CREATION_STATUS_PRIMARY_CREDENTIAL_SET = 2;
-    CREATION_STATUS_PIN_CREDENTIAL_SET = 3;
+    reserved 3;
   }
 
   ActivityStatus status = 3;

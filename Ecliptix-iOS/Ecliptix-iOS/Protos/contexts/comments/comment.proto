@@ -19,7 +19,7 @@ message CommentAuthor {
   bytes membership_id = 1;
   bytes account_id = 6;
   string display_name = 2;
-  string profile_name = 3;
+  string handle = 3;
   optional string avatar_url = 4;
   bool is_verified = 5;
 }

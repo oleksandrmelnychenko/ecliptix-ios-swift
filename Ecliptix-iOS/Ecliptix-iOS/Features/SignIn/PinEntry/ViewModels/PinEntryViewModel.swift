@@ -24,20 +24,26 @@ final class PinEntryViewModel: Resettable {
 
   private let pinLength: Int = 4
   private let pinOpaqueService: PinOpaqueService
+  private let secureStorageService: SecureStorageService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   private let onPinVerified: () -> Void
+  private let onPinSetupRequired: () -> Void
 
   init(
     pinOpaqueService: PinOpaqueService,
+    secureStorageService: SecureStorageService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32,
-    onPinVerified: @escaping () -> Void = {}
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId,
+    onPinVerified: @escaping () -> Void = {},
+    onPinSetupRequired: @escaping () -> Void = {}
   ) {
     self.pinOpaqueService = pinOpaqueService
+    self.secureStorageService = secureStorageService
     self.settingsProvider = settingsProvider
     self.connectIdProvider = connectIdProvider
     self.onPinVerified = onPinVerified
+    self.onPinSetupRequired = onPinSetupRequired
   }
 
   func verifyPin() async {
@@ -100,7 +106,14 @@ final class PinEntryViewModel: Resettable {
       case .notRegistered:
         AppLogger.auth.warning(
           "PinEntry: PIN not registered for accountId=\(accountId.uuidString, privacy: .public)")
-        pinError = String(localized: "PIN not set up. Please set up your PIN first.")
+        let checkpointResult = await secureStorageService.setRegistrationCheckpoint(
+          .primaryCredentialSet)
+        if let checkpointError = checkpointResult.err() {
+          AppLogger.auth.warning(
+            "PinEntry: failed to downgrade stale checkpoint for accountId=\(accountId.uuidString, privacy: .public), error=\(checkpointError, privacy: .public)"
+          )
+        }
+        onPinSetupRequired()
       case .accountNotFound:
         pinError = String(localized: "Account not found.")
       case .networkFailed(let rpcError):

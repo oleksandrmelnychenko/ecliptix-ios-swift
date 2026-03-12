@@ -104,7 +104,7 @@ struct FeedListView: View {
             onQuote: { onNavigate(.createQuote(quotedPostId: post.id)) },
             onShare: {},
             onBookmark: { Task { await viewModel.toggleBookmark(post.id) } },
-            onAuthorTap: { onNavigate(.userProfile(membershipId: post.author.membershipId)) },
+            onAuthorTap: { onNavigate(.profile(membershipId: post.author.membershipId)) },
             onPostTap: { onNavigate(.postThread(postId: post.id)) }
           )
 

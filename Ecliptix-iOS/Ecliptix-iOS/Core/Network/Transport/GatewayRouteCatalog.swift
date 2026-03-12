@@ -30,8 +30,8 @@ enum GatewayRouteCatalog {
     .anonymousLogout: GatewayRoute(.identityAccess, .identitySessionLogoutAnonymous, .unary),
     .profileLookup: GatewayRoute(.identityAccess, .identityProfileLookup, .unary),
     .profileUpsert: GatewayRoute(.identityAccess, .identityProfileUpsert, .unary),
-    .profileNameAvailability: GatewayRoute(
-      .identityAccess, .identityProfileNameAvailability, .unary),
+    .handleAvailability: GatewayRoute(
+      .identityAccess, .identityHandleAvailability, .unary),
     .pinRegisterInit: GatewayRoute(.identityAccess, .identityPinRegisterInit, .unary),
     .pinRegisterComplete: GatewayRoute(.identityAccess, .identityPinRegisterComplete, .unary),
     .pinVerifyInit: GatewayRoute(.identityAccess, .identityPinVerifyInit, .unary),

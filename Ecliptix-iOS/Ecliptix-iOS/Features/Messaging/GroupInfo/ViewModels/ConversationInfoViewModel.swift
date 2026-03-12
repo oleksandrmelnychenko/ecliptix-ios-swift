@@ -24,14 +24,14 @@ final class ConversationInfoViewModel: Resettable {
 
   private let messagingService: MessagingRpcService
   private let settingsProvider: () -> ApplicationInstanceSettings?
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   let conversationId: Data
 
   init(
     conversationId: Data,
     messagingService: MessagingRpcService,
     settingsProvider: @escaping () -> ApplicationInstanceSettings?,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId
   ) {
     self.conversationId = conversationId
     self.messagingService = messagingService
@@ -63,7 +63,7 @@ final class ConversationInfoViewModel: Resettable {
           id: member.membershipID,
           accountId: member.accountID,
           displayName: member.displayName,
-          profileName: member.profileName,
+          handle: member.handle,
           avatarUrl: member.hasAvatarURL ? member.avatarURL : nil,
           role: MemberDisplayItem.MemberRole(rawValue: member.role.rawValue) ?? .member,
           joinedAt: member.hasJoinedAt ? member.joinedAt.date : nil
@@ -130,19 +130,11 @@ final class ConversationInfoViewModel: Resettable {
       newMemberIds: ids,
       connectId: connectId
     )
-    if case .ok(let response) = result {
-      let newMembers = response.addedMembers.map { member in
-        MemberDisplayItem(
-          id: member.membershipID,
-          accountId: member.accountID,
-          displayName: "",
-          profileName: "",
-          avatarUrl: nil,
-          role: MemberDisplayItem.MemberRole(rawValue: member.role.rawValue) ?? .member,
-          joinedAt: member.hasJoinedAt ? member.joinedAt.date : nil
-        )
-      }
-      members.append(contentsOf: newMembers)
+    if case .ok = result {
+      await loadInfo()
+    } else if case .err(let error) = result {
+      hasError = true
+      errorMessage = error.userFacingMessage
     }
   }
 
@@ -277,16 +269,16 @@ final class ConversationInfoViewModel: Resettable {
     isAdmin = true
     members = [
       MemberDisplayItem(
-        id: Data([1]), accountId: Data([1]), displayName: "You", profileName: "me", avatarUrl: nil,
+        id: Data([1]), accountId: Data([1]), displayName: "You", handle: "me", avatarUrl: nil,
         role: .owner, joinedAt: Date().addingTimeInterval(-86400 * 30)),
       MemberDisplayItem(
-        id: Data([2]), accountId: Data([2]), displayName: "Alice Johnson", profileName: "alice",
+        id: Data([2]), accountId: Data([2]), displayName: "Alice Johnson", handle: "alice",
         avatarUrl: nil, role: .admin, joinedAt: Date().addingTimeInterval(-86400 * 25)),
       MemberDisplayItem(
-        id: Data([3]), accountId: Data([3]), displayName: "Bob Smith", profileName: "bob",
+        id: Data([3]), accountId: Data([3]), displayName: "Bob Smith", handle: "bob",
         avatarUrl: nil, role: .member, joinedAt: Date().addingTimeInterval(-86400 * 20)),
       MemberDisplayItem(
-        id: Data([4]), accountId: Data([4]), displayName: "Carol Williams", profileName: "carol",
+        id: Data([4]), accountId: Data([4]), displayName: "Carol Williams", handle: "carol",
         avatarUrl: nil, role: .member, joinedAt: Date().addingTimeInterval(-86400 * 10)),
     ]
   }

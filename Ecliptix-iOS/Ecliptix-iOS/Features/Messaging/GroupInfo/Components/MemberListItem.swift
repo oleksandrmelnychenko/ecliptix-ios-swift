@@ -27,7 +27,7 @@ struct MemberListItem: View {
           Text(member.displayName)
             .font(.geist(.medium, size: 15))
             .foregroundColor(.ecliptixPrimaryText)
-          Text("@\(member.profileName)")
+          Text("@\(member.handle)")
             .font(.geistCaption)
             .foregroundColor(.ecliptixSecondaryText)
         }

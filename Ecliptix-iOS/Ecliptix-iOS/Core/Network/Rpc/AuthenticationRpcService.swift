@@ -11,15 +11,15 @@ final class AuthenticationRpcService {
   private let transport: EventGatewayTransport
   private let secureSessionClient: any SecureSessionClient
   private let streamRequestExecutor: any SecureStreamingRequestExecuting
-  private let connectIdProvider: (PubKeyExchangeType) -> UInt32
+  private let connectIdProvider: (PubKeyExchangeType) -> ConnectId
   private let pipeline: SecureUnaryPipeline
   private let streamManager = VerificationStreamManager()
 
   init(
     transport: EventGatewayTransport,
     secureSessionClient: any SecureSessionClient & SecureStreamingRequestExecuting
-      & NetworkOutageControlling,
-    connectIdProvider: @escaping (PubKeyExchangeType) -> UInt32,
+      & NetworkOutageControlling & SessionRecoveryCoordinating,
+    connectIdProvider: @escaping (PubKeyExchangeType) -> ConnectId,
     secureStorageService: SecureStorageService,
     protocolStateStorage: ProtocolStateStorage,
     identityService: IdentityService
@@ -88,8 +88,8 @@ final class AuthenticationRpcService {
     verificationId: String,
     otpCode: String,
     purposeRawValue: Int = 1,
-    streamConnectId: UInt32 = 0,
-    connectId: UInt32? = nil
+    streamConnectId: ConnectId = 0,
+    connectId: ConnectId? = nil
   ) async -> Result<OtpVerificationResult, RpcError> {
     let mappedStreamConnectId = streamManager.tryGetActiveStream(verificationId)
     guard let effectiveStreamConnectId = mappedStreamConnectId, effectiveStreamConnectId != 0 else {
@@ -174,7 +174,7 @@ final class AuthenticationRpcService {
     verificationId: String,
     otpCode: String,
     purposeRawValue: Int = 1,
-    streamConnectId: UInt32 = 0,
+    streamConnectId: ConnectId = 0,
     onStatusUpdate: @escaping (OtpVerificationStatus) -> Void
   ) async -> Result<OtpVerificationResult, RpcError> {
     onStatusUpdate(.validating)
@@ -210,7 +210,7 @@ final class AuthenticationRpcService {
 
   func initiateRecoveryVerification(
     mobileNumber: String,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<SignInInitiateResponse, RpcError> {
     AppLogger.auth.info(
       "Recovery verification: start mobile=\(mobileNumber, privacy: .private(mask: .hash)), connectId=\(connectId, privacy: .public)"
@@ -241,7 +241,7 @@ final class AuthenticationRpcService {
 
   func terminateSession(
     request: AuthenticatedLogoutRequest,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<AuthenticatedLogoutResponse, RpcError> {
     AppLogger.auth.info("TerminateSession: start connectId=\(connectId, privacy: .public)")
     return await executeTypedUnary(
@@ -251,7 +251,7 @@ final class AuthenticationRpcService {
 
   func signInOpaqueInit(
     request: OpaqueSignInInitRequest,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<OpaqueSignInInitResponse, RpcError> {
     AppLogger.auth.info("OPAQUE sign-in init: start connectId=\(connectId, privacy: .public)")
     return await executeTypedUnary(
@@ -261,7 +261,7 @@ final class AuthenticationRpcService {
 
   func registrationOpaqueInit(
     request: OpaqueRegistrationInitRequest,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<OpaqueRegistrationInitResponse, RpcError> {
     AppLogger.auth.info("OPAQUE registration init: start connectId=\(connectId, privacy: .public)")
     return await executeTypedUnary(
@@ -271,7 +271,7 @@ final class AuthenticationRpcService {
 
   func registrationOpaqueComplete(
     request: OpaqueRegistrationCompleteRequest,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<OpaqueRegistrationCompleteResponse, RpcError> {
     AppLogger.auth.info(
       "OPAQUE registration complete: start connectId=\(connectId, privacy: .public)")
@@ -282,7 +282,7 @@ final class AuthenticationRpcService {
 
   func recoveryOpaqueInit(
     request: OpaqueRecoveryInitRequest,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<OpaqueRecoveryInitResponse, RpcError> {
     AppLogger.auth.info("OPAQUE recovery init: start connectId=\(connectId, privacy: .public)")
     return await executeTypedUnary(
@@ -292,7 +292,7 @@ final class AuthenticationRpcService {
 
   func recoveryOpaqueComplete(
     request: OpaqueRecoveryCompleteRequest,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<OpaqueRecoveryCompleteResponse, RpcError> {
     AppLogger.auth.info("OPAQUE recovery complete: start connectId=\(connectId, privacy: .public)")
     return await executeTypedUnary(
@@ -302,7 +302,7 @@ final class AuthenticationRpcService {
 
   func signInOpaqueFinalize(
     request: OpaqueSignInFinalizeRequest,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<OpaqueSignInFinalizeResponse, RpcError> {
     AppLogger.auth.info("OPAQUE sign-in finalize: start connectId=\(connectId, privacy: .public)")
     return await executeTypedUnary(
@@ -312,7 +312,7 @@ final class AuthenticationRpcService {
 
   func validateMobileNumberSecure(
     mobileNumber: String,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<MobileNumberValidateResponse, RpcError> {
     AppLogger.auth.info(
       "ValidateMobile: start connectId=\(connectId, privacy: .public), mobile=\(mobileNumber, privacy: .private(mask: .hash))"
@@ -326,7 +326,7 @@ final class AuthenticationRpcService {
 
   func validateMobileForRecoverySecure(
     mobileNumber: String,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<MobileNumberValidateResponse, RpcError> {
     AppLogger.auth.info(
       "ValidateMobileRecovery: start connectId=\(connectId, privacy: .public), mobile=\(mobileNumber, privacy: .private(mask: .hash))"
@@ -340,7 +340,7 @@ final class AuthenticationRpcService {
 
   func checkMobileNumberAvailabilitySecure(
     mobileNumberId: Data,
-    connectId: UInt32
+    connectId: ConnectId
   ) async -> Result<MobileNumberAvailabilityResponse, RpcError> {
     AppLogger.auth.info("CheckMobileAvailability: start connectId=\(connectId, privacy: .public)")
     var request = MobileNumberAvailabilityRequest()
@@ -354,7 +354,7 @@ final class AuthenticationRpcService {
     sessionId: String,
     purposeRawValue: Int,
     requestTypeRawValue: Int = AppConstants.Otp.requestTypeSend,
-    connectId: UInt32,
+    connectId: ConnectId,
     onUpdate: @escaping (OtpCountdownUpdate) -> Void,
     cancellationToken: CancellationToken = .none
   ) async -> Result<Unit, RpcError> {
@@ -445,7 +445,7 @@ final class AuthenticationRpcService {
   private func executeTypedUnary<Request: SwiftProtobuf.Message, Response: SwiftProtobuf.Message>(
     serviceType: RpcServiceType,
     request: Request,
-    connectId: UInt32,
+    connectId: ConnectId,
     label: String
   ) async -> Result<Response, RpcError> {
     let requestData: Data
@@ -481,11 +481,11 @@ final class AuthenticationRpcService {
     return .ok(response)
   }
 
-  private func transportConnectId(_ explicitConnectId: UInt32?) -> UInt32 {
+  private func transportConnectId(_ explicitConnectId: ConnectId?) -> ConnectId {
     explicitConnectId ?? currentConnectId()
   }
 
-  private func currentConnectId() -> UInt32 {
+  private func currentConnectId() -> ConnectId {
     connectIdProvider(.dataCenterEphemeralConnect)
   }
 
@@ -547,7 +547,7 @@ struct SessionInfo {
   let scopes: [String]
 }
 
-struct ProfileNameAvailabilityResult {
+struct HandleAvailabilityResult {
 
   let isAvailable: Bool
   let reason: String

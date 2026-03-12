@@ -21,7 +21,7 @@ struct ContactListItem: View {
         Text(contact.displayName)
           .font(.geist(.medium, size: 16))
           .foregroundColor(.ecliptixPrimaryText)
-        Text("@\(contact.profileName)")
+        Text("@\(contact.handle)")
           .font(.geistCaption)
           .foregroundColor(.ecliptixSecondaryText)
       }

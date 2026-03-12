@@ -77,7 +77,7 @@ struct PostCellView: View {
               .foregroundStyle(Color.ecliptixPrimaryText)
               .lineLimit(1)
 
-            Text("@\(displayPost.author.profileName)")
+            Text("@\(displayPost.author.handle)")
               .font(.geistFootnote)
               .foregroundStyle(Color.ecliptixSecondaryText)
               .lineLimit(1)

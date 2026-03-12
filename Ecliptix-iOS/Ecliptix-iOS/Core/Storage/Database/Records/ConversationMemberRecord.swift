@@ -12,7 +12,7 @@ struct ConversationMemberRecord: Codable, Sendable {
   var leafIndex: Int
   var role: Int
   var displayName: String
-  var profileName: String?
+  var handle: String?
   var avatarUrl: String?
   var joinedAt: Int64
 }

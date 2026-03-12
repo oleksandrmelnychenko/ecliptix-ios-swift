@@ -71,12 +71,16 @@ extension AppDependencies {
   }
 
   @MainActor
-  func makeUserProfileViewModel(membershipId: Data) -> UserProfileViewModel {
-    UserProfileViewModel(
+  func makeProfileViewModel(
+    membershipId: Data, fallbackDisplayName: String? = nil, fallbackHandle: String? = nil
+  ) -> ProfileViewModel {
+    ProfileViewModel(
       membershipId: membershipId,
       messagingService: messagingRpcService,
       settingsProvider: weakSettingsProvider(),
-      connectIdProvider: weakConnectIdProvider()
+      connectIdProvider: weakConnectIdProvider(),
+      fallbackDisplayName: fallbackDisplayName,
+      fallbackHandle: fallbackHandle
     )
   }
 

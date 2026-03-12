@@ -97,6 +97,7 @@ final class AppFlowResolver {
   }
 
   func resolveStoredSignInDecision(
+    settings: ApplicationInstanceSettings?,
     creationStatus: SignInCreationStatus,
     storedIdentity: (accountId: UUID, membershipId: UUID)?
   ) -> StoredSignInDecision {
@@ -106,9 +107,12 @@ final class AppFlowResolver {
 
     switch creationStatus {
     case .primaryCredentialSet:
-      return .pinSetup
-    case .pinCredentialSet:
-      return .pinEntry
+      switch settings?.registrationCheckpoint {
+      case .pinCredentialSet, .profileCompleted:
+        return .pinEntry
+      default:
+        return .pinSetup
+      }
     }
   }
 
@@ -169,13 +173,7 @@ final class AppFlowResolver {
         }
         return .pinSetup(mobileNumber: membership.mobileNumber)
 
-      case .pinCredentialSet:
-        guard settings.currentAccountId != nil else {
-          return secureKeyRoute
-        }
-        return .completeProfile(mobileNumber: membership.mobileNumber)
-
-      case .profileCompleted:
+      case .pinCredentialSet, .profileCompleted:
         return nil
       }
     }

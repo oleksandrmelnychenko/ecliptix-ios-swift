@@ -33,7 +33,7 @@ struct PostDisplayItem: Identifiable, Hashable, Sendable {
     let membershipId: Data
     let accountId: Data
     let displayName: String
-    let profileName: String
+    let handle: String
     let avatarUrl: String?
     let isVerified: Bool
   }
